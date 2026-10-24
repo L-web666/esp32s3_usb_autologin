@@ -1,0 +1,6 @@
+REM example unlock and login to windows
+ENTER
+DELAY 1000
+COMMAND button run 9
+DELAY 1000
+ENTER

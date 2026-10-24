@@ -1,0 +1,96 @@
+/* Root Variables for Dark Theme */
+:root {
+    --background-color: #121212;
+    --text-color: #ffffff;
+    --button-bg: #3c3c3c;
+    --button-border: #444444;
+    --button-hover-bg: #555555;
+    --tooltip-bg: #222222;
+    --tooltip-text: #ffffff;
+    --border-radius: 8px;
+    --padding-small: 10px;
+    --padding-large: 20px;
+    --font-size: 1rem;
+  }
+
+  /* Style the dropdown distinctly from buttons */
+  #categoryFilter {
+    display: block;
+    padding: var(--padding-small) var(--padding-large);
+    background-color: #222222;
+    /* Slightly different from buttons */
+    color: var(--text-color);
+    border: 2px solid var(--button-border);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    appearance: none;
+    /* Remove default dropdown styles */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5H7z"/></svg>');
+    /* Custom chevron icon */
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+  }
+
+  /* Differentiate dropdown hover effect */
+  #categoryFilter:hover,
+  #categoryFilter:focus {
+    background-color: #333333;
+    /* Darker than buttons */
+    border-color: #666666;
+    outline: none;
+  }
+
+  /* Style the dropdown label */
+  #categoryLabel {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  /* Ensure dropdown container is centered */
+  #controlsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  /* Center button container */
+  #buttonContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .button {
+    display: block;
+    padding: var(--padding-small) var(--padding-large);
+    background-color: var(--dynamic-bg-color, var(--button-bg));
+    color: var(--text-color);
+    border: 2px solid var(--button-border);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .button:hover {
+    border-color: var(--button-hover-bg);
+    background-color: var(--button-hover-bg);
+  }

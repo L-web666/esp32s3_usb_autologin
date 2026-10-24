@@ -1,0 +1,58 @@
+@baseUrl = http://passtxt4.local
+@token = test
+
+### Get All Buttons
+GET {{baseUrl}}/buttons
+Authorization: Bearer {{token}}
+
+###
+
+### Run a button by ID
+POST {{baseUrl}}/run-button?id=7
+Authorization: Bearer {{token}}
+
+###
+
+### Create or Update Buttons
+POST {{baseUrl}}/buttons
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "buttons": [
+    {
+      "name": "WiFi Password",
+      "category": "Passwords",
+      "action": "Type",
+      "command": "",
+      "notes": "Updated WiFi password for guests"
+    }
+  ]
+}
+
+###
+
+### update a button
+POST {{baseUrl}}/buttons
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "buttons": [
+    {
+      "id": 1,
+      "notes": "Updated WiFi password for guests2"
+    }
+  ]
+}
+
+###
+http://demo1.local/buttons?id=1737767037313 
+
+### Delete a Button
+DELETE {{baseUrl}}/buttons?id=1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+

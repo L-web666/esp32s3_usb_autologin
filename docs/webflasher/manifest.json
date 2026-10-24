@@ -1,0 +1,14 @@
+{
+  "name": "PassTxt AutoLogin Keyboard",
+  "version": "1.0.10",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "improv": false,
+      "parts": [
+        { "path": "firmware/device.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

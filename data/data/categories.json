@@ -1,0 +1,24 @@
+{
+  "categories": [
+    {
+      "name": "LED",
+      "id": 1
+    },
+    {
+      "name": "TFT",
+      "id": 2
+    },
+    {
+      "name": "MQTT",
+      "id": 3
+    },
+    {
+      "name": "DuckyScript",
+      "id": 4
+    },
+    {
+      "name": "CERT",
+      "id": 5
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+@baseUrl = http://passtxt1.local
+@token = test
+
+### Get all categories
+GET {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+
+###
+
+### Create or update categories
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categories": [
+    {
+      "name": "Test2"
+    }
+  ]
+}
+
+###
+
+### update a category
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categories": [
+    {
+      "id": 8,
+      "name": "Test2"
+    }
+  ]
+}
+
+###
+
+### Delete a category
+DELETE {{baseUrl}}/categories?id=8
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###

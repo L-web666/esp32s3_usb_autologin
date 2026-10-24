@@ -1,0 +1,27 @@
+@baseUrl = http://passtxt4.local
+@token = test
+
+### Get all folders
+GET {{baseUrl}}/folders
+Authorization: Bearer {{token}}
+###
+
+### Create a new folder
+POST {{baseUrl}}/folder?foldername=/test
+Authorization: Bearer {{token}}
+###
+
+### Rename a folder
+POST {{baseUrl}}/rename?foldname=/test&newname=/test2
+Authorization: Bearer {{token}}
+###
+
+### Delete a new folder
+DELETE {{baseUrl}}/folder?foldername=/hello/
+Authorization: Bearer {{token}}
+###
+
+### Delete a new folder
+DELETE {{baseUrl}}/folder?foldername=/test1/
+Authorization: Bearer {{token}}
+###

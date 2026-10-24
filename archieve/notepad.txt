@@ -1,0 +1,7 @@
+DELAY 1000
+GUI R
+DELAY 1000
+STRING notepad
+DELAY 1000
+STRING hello notepad
+ENTER

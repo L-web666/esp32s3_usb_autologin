@@ -1,0 +1,7 @@
+wget https://raw.githubusercontent.com/mdelgert/ImprovWiFiWeb/refs/heads/main/scripts/buttons1.json
+wget https://raw.githubusercontent.com/mdelgert/ImprovWiFiWeb/refs/heads/main/scripts/cron1.ptxt
+wget https://raw.githubusercontent.com/mdelgert/ImprovWiFiWeb/refs/heads/main/scripts/hello1.ptxt
+download https://raw.githubusercontent.com/mdelgert/ImprovWiFiWeb/refs/heads/main/scripts/hello1.ptxt /rename1.ptxt
+
+
+

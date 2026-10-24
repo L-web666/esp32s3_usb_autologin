@@ -1,0 +1,28 @@
+{
+	"name": "PlatformIO",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"platformio.platformio-ide",
+				"github.copilot",
+				"github.copilot-chat"
+			]
+		}
+	},
+	"forwardPorts": [8008],
+	"mounts": [
+		"source=/dev/,target=/dev/,type=bind,consistency=consistent"
+	],
+	"runArgs": [
+		"--privileged"
+	],
+	"postAttachCommand": "sudo service udev restart"
+}

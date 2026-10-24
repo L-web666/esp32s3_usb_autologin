@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 OTA Firmware Update</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      text-align: center;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 500px;
+    }
+    .file-input {
+      display: none;
+    }
+    .custom-file-label {
+      display: inline-block;
+      background-color: #6200ee;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .custom-file-label:hover {
+      background-color: #3700b3;
+    }
+    .file-name {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #aaaaaa;
+    }
+    button {
+      background-color: #6200ee;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3700b3;
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #ffaa00;
+    }
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 10px;
+      display: none;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Firmware Update</h1>
+    <form id="otaForm" method="POST" action="/device/ota" enctype="multipart/form-data">
+      <!-- Hidden file input -->
+      <input id="firmware" class="file-input" type="file" name="firmware" required>
+      <!-- Custom label -->
+      <label for="firmware" class="custom-file-label">Choose File</label>
+      <!-- Display selected file name -->
+      <div id="file-name" class="file-name">No file chosen</div>
+      <br>
+      <button type="submit">Upload Firmware</button>
+    </form>
+    <div class="status" id="statusMessage"></div>
+    <div class="spinner" id="spinner"></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('firmware');
+    const fileNameDisplay = document.getElementById('file-name');
+    const otaForm = document.getElementById('otaForm');
+    const statusMessage = document.getElementById('statusMessage');
+    const spinner = document.getElementById('spinner');
+
+    // Update the file name display when a file is selected
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+      } else {
+        fileNameDisplay.textContent = 'No file chosen';
+      }
+    });
+
+    // Handle form submission
+    otaForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      // Show spinner and status message
+      statusMessage.textContent = 'Uploading... Please wait.';
+      spinner.style.display = 'inline-block';
+
+      const formData = new FormData(otaForm);
+
+      try {
+        const response = await fetch(otaForm.action, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const responseData = await response.text(); // Or JSON if your server returns JSON
+          statusMessage.textContent = 'Upload successful! Device is rebooting...';
+        } else {
+          statusMessage.textContent = `Upload failed! Error ${response.status}`;
+        }
+      } catch (error) {
+        statusMessage.textContent = `An error occurred: ${error.message}`;
+      } finally {
+        spinner.style.display = 'none'; // Hide spinner after upload
+      }
+    });
+  </script>
+</body>
+</html>

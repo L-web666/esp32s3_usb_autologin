@@ -1,0 +1,20 @@
+DELAY 1000
+COMMAND led color red
+DELAY 1000
+COMMAND tft print hello1
+DELAY 1000
+COMMAND led color white
+DELAY 1000
+COMMAND tft print hello2
+DELAY 1000
+COMMAND led color purple
+DELAY 1000
+COMMAND tft print hello3
+DELAY 1000
+COMMAND led color black
+DELAY 1000
+COMMAND tft draw lock,45,5,60,60
+DELAY 1000
+COMMAND tft draw unlock,45,5,60,60
+DELAY 1000
+COMMAND DUCKY FILE /scripts/cmd1.txt

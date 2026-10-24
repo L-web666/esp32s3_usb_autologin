@@ -1,0 +1,62 @@
+<!-- files2.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/mode/simple.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/powershell/powershell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>
+    <link rel="stylesheet" href="/css/files.css" />
+    <script type="module" src="/js/files2.js" defer></script>
+    <style></style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="breadcrumbs" id="breadcrumbs"></div>
+            <ul id="fileList" class="file-list"></ul>
+        </div>
+        <div class="editor">
+            <div class="toolbar">
+                <select id="fontSizeSelector" onchange="changeFontSize()">
+                    <option value="12px">12px</option>
+                    <option value="14px" selected>14px</option>
+                    <option value="16px">16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                </select>
+                <button id="newFileBtn">New File</button>
+                <button id="deleteFileBtn">Delete File</button>
+                <button id="newFolderBtn">New Folder</button>
+                <button id="deleteFolderBtn">Delete Folder</button>
+                <button id="renameBtn">Rename</button>
+                <button id="saveBtn">Save</button>
+                <button id="toolsBtn">Tools</button>
+                <button id="runBtn">Run</button>
+                <button id="downloadBtn">Download</button>
+            </div>
+            <span id="statusMessage"></span>
+            <div class="editor-container" id="editorContainer"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="toolsModalOverlay" onclick="toggleToolsModal()"></div>
+    <div class="modal" id="toolsModal">
+        <h3>Tools</h3>
+        <span id="modalMessage"></span>
+        <button id="formatJsonBtn">Format JSON</button>
+        <button id="minifyJsonBtn">Minify JSON</button>
+        <button id="validateJsonBtn">Validate JSON</button>
+    </div>
+    <script></script>
+</body>
+</html>

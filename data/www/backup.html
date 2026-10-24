@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Backup &amp; Restore (Dark Theme)</title>
+  <!-- Include JSZip from a CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <style>
+    /* ----- Simple Dark Theme Styles ----- */
+    body {
+      background-color: #222;
+      color: #ccc;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1,
+    h2 {
+      color: #eee;
+      margin-bottom: 0.5rem;
+    }
+
+    button {
+      background-color: #444;
+      color: #ccc;
+      border: 1px solid #666;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .log {
+      background: #333;
+      color: #ccc;
+      padding: 10px;
+      margin-top: 1rem;
+      height: 250px;
+      overflow-y: auto;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+
+    a {
+      color: #9cf;
+    }
+
+    /* ----- Styled file input ----- */
+    input[type="file"] {
+      display: none;
+      /* Hide the default file input */
+    }
+
+    label.file-label {
+      display: inline-block;
+      background-color: #444;
+      color: #ccc;
+      border: 1px solid #666;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 4px;
+    }
+
+    label.file-label:hover {
+      background-color: #555;
+    }
+
+    /* If you want the chosen file name to appear somewhere, you can style that too. */
+    #chosenFileName {
+      display: inline-block;
+      margin-left: 10px;
+      color: #ccc;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Backup &amp; Restore</h1>
+    <p>This page can both download all files from your device into a single ZIP, and restore them from a ZIP you select.
+    </p>
+
+    <!-- BACKUP SECTION -->
+    <h2>Backup</h2>
+    <button onclick="downloadAllAsZip()">Download All Files as ZIP</button>
+
+    <!-- RESTORE SECTION -->
+    <h2>Restore</h2>
+
+    <!-- Styled "Choose File" button: a label pointing to a hidden file input -->
+    <label for="restoreZipInput" class="file-label">Choose ZIP File</label>
+    <span id="chosenFileName"></span>
+    <input type="file" id="restoreZipInput" accept=".zip" onchange="onZipSelected(event)" />
+
+    <br />
+    <button onclick="restoreFromZip()">Restore Selected ZIP</button>
+
+    <!-- LOG OUTPUT -->
+    <div class="log" id="logOutput"></div>
+  </div>
+
+  <script>
+    // 1. Endpoint logic: if we're on localhost, use 'http://demo1.local' as base
+    const endPoint = window.location.hostname === "localhost"
+      ? "http://demo1.local"
+      : "";
+
+    // 2. Simple logger to append messages to the .log div
+    function log(message) {
+      const logEl = document.getElementById('logOutput');
+      logEl.textContent += message + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Show the chosen file name next to the button
+    function onZipSelected(event) {
+      const fileInput = event.target;
+      const chosenFileNameEl = document.getElementById("chosenFileName");
+      if (fileInput.files && fileInput.files.length > 0) {
+        chosenFileNameEl.textContent = fileInput.files[0].name;
+      } else {
+        chosenFileNameEl.textContent = "";
+      }
+    }
+
+    // ===========================
+    // BACKUP: Download All Files
+    // ===========================
+    async function downloadAllAsZip() {
+      log("Starting backup process...");
+
+      try {
+        // 1. Fetch the file list: GET /files
+        const fileListUrl = `${endPoint}/files`;
+        log(`Fetching file list from: ${fileListUrl}`);
+
+        const fileListRes = await fetch(fileListUrl);
+        if (!fileListRes.ok) {
+          throw new Error(`Failed to fetch file list: HTTP ${fileListRes.status}`);
+        }
+        const fileListJson = await fileListRes.json();
+        const files = fileListJson.data.files || [];
+
+        if (files.length === 0) {
+          log("No files found on the device.");
+          return;
+        }
+
+        log(`Found ${files.length} files: ${files.join(", ")}`);
+
+        // 2. Create a new JSZip instance
+        const zip = new JSZip();
+
+        // 3. Fetch each file and add to ZIP
+        for (const filePath of files) {
+          const encodedPath = encodeURIComponent(filePath);
+          const downloadUrl = `${endPoint}/file?filename=${encodedPath}`;
+
+          log(`Downloading: ${filePath}`);
+          const fileRes = await fetch(downloadUrl);
+          if (!fileRes.ok) {
+            log(` -> Skipping file (HTTP ${fileRes.status}).`);
+            continue;
+          }
+
+          // Get the file data as a binary ArrayBuffer
+          const fileData = await fileRes.arrayBuffer();
+
+          // Remove leading slash so it doesn't create an empty top-level folder in the zip
+          let zipName = filePath.startsWith("/") ? filePath.substring(1) : filePath;
+          // Add to the ZIP
+          zip.file(zipName, fileData);
+        }
+
+        // 4. Generate the ZIP (as a Blob)
+        log("Generating ZIP archive...");
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+
+        // 5. Trigger download in the browser
+        log("Triggering download of backup.zip");
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "backup.zip";
+        link.click();
+        URL.revokeObjectURL(url);
+
+        log("All files zipped and download triggered successfully.");
+      } catch (error) {
+        log("Error (Backup): " + error.message);
+        console.error(error);
+      }
+    }
+
+    // Known bug does not appear to restore empty files need to check and test backend code
+    // ===========================
+    // RESTORE: Upload ZIP Files
+    // ===========================
+    async function restoreFromZip() {
+      const fileInput = document.getElementById("restoreZipInput");
+      if (!fileInput.files || fileInput.files.length === 0) {
+        log("Please select a .zip file first.");
+        return;
+      }
+
+      const zipFile = fileInput.files[0];
+      if (!zipFile) {
+        log("No file selected.");
+        return;
+      }
+
+      log(`Reading ZIP file: ${zipFile.name}`);
+
+      try {
+        // 1. Read the chosen ZIP file as ArrayBuffer
+        const arrayBuffer = await zipFile.arrayBuffer();
+
+        // 2. Load it into JSZip
+        const zip = await JSZip.loadAsync(arrayBuffer);
+        const fileNames = Object.keys(zip.files);
+        log(`ZIP contains ${fileNames.length} entries:`);
+
+        // 3. Upload each file with a delay and retry mechanism
+        for (const name of fileNames) {
+          log(`Extracting & uploading: ${name}`);
+
+          const entry = zip.files[name];
+          if (entry.dir) {
+            log(` -> ${name} is a directory. Skipping...`);
+            continue;
+          }
+
+          // Read file as ArrayBuffer
+          const fileData = await entry.async("arrayBuffer");
+
+          // Determine file size
+          const fileSize = fileData.byteLength || 0;
+          log(` -> File size: ${fileSize} bytes`);
+
+          // **Handle empty files: Skip or send minimal payload**
+          if (fileSize === 0) {
+            log(` -> Skipping ${name} (empty file)`);
+            continue;
+          }
+
+          // Store with a leading slash
+          const devicePath = "/" + name; // e.g., "/scripts/tft1.txt"
+          const encodedPath = encodeURIComponent(devicePath).replace(/%2F/g, "/");
+          const uploadUrl = `${endPoint}/file?filename=${encodedPath}`;
+
+          // Retry logic for failed uploads (max 3 attempts)
+          let attempts = 0;
+          let success = false;
+
+          while (attempts < 3 && !success) {
+            attempts++;
+            log(` -> Attempt ${attempts}: Uploading ${devicePath}`);
+
+            try {
+              const res = await fetch(uploadUrl, {
+                method: "POST",
+                body: fileData
+              });
+
+              if (!res.ok) {
+                log(` -> Upload failed (HTTP ${res.status}) for ${devicePath}`);
+              } else {
+                log(` -> Upload success for ${devicePath}`);
+                success = true;
+              }
+            } catch (error) {
+              log(` -> Upload error: ${error.message}`);
+            }
+
+            // Wait 100ms before retrying
+            if (!success) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          }
+
+          if (!success) {
+            log(` -> Skipping ${devicePath} after 3 failed attempts.`);
+          }
+
+          // Add a small delay to avoid overwhelming the server
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        log("Restore completed.");
+      } catch (error) {
+        log("Error (Restore): " + error.message);
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

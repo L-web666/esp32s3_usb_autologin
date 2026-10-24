@@ -1,0 +1,90 @@
+@baseUrl = http://demo1.local
+@token = test
+
+### Test1
+POST {{baseUrl}}/file?filename=/a.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+REM Start of script
+DEFAULTDELAY 1000
+REM Say hello
+REM TEMPLATE HELLO
+REM DELAY 1000
+REM TEMPLATE DEBUG
+REM led clear
+tft print hello1
+REM led color purple
+REM led color green
+tft print hello2
+REM led color white
+tft print hello3
+REM led color black
+
+REPEAT 3000000000000
+
+REM End of script
+###
+
+### send command2
+POST {{baseUrl}}/command/set
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+script file /a.txt
+###
+
+### Test2
+POST {{baseUrl}}/file?filename=/b.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+REM Start of script
+
+led brightness 255
+
+led color purple
+DELAY 1000
+
+led color blue
+DELAY 1000
+
+REPEAT 30
+
+REM End of script
+###
+
+### Test3
+POST {{baseUrl}}/file?filename=/c.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+REM Start of script
+DEFAULTDELAY 500
+
+REM Say hello
+TEMPLATE HELLO
+DELAY 1000
+
+REM Repeat the following block 3 times
+TEMPLATE DEBUG
+REPEAT 3
+
+REM End of script
+###
+
+### Test4
+POST {{baseUrl}}/file?filename=/1.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+REM Start of script
+DEFAULTDELAY 1000
+led color blue
+led color purple
+REM hid keys1 hello
+REPEAT 30
+
+REM End of script
+###
+

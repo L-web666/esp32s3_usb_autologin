@@ -1,0 +1,66 @@
+{
+    "name": "test",
+    "on": {
+        "push": {
+            "branches-ignore": [
+                "master"
+            ],
+            "paths-ignore": [
+                ".git*",
+                "**.md",
+                "*.properties"
+            ]
+        },
+        "pull_request": {
+            "branches": [
+                "master"
+            ],
+            "paths-ignore": [
+                ".git*",
+                "**.md",
+                "*.properties"
+            ]
+        }
+    },
+    "jobs": {
+        "test": {
+            "name": "test: ${{matrix.board.name}}",
+            "runs-on": "ubuntu-latest",
+            "strategy": {
+                "fail-fast": true,
+                "matrix": {
+                    "board": [{
+                        "vendor": "arduino",
+                        "arch": "avr",
+                        "name": "uno"
+                    }, {
+                        "vendor": "arduino",
+                        "arch": "samd",
+                        "name": "arduino_zero_native"
+                    }, {
+                        "vendor": "arduino",
+                        "arch": "renesas_uno",
+                        "name": "minima"
+                    }],
+                    "include": [{
+                        "index": "https://downloads.arduino.cc/packages/package_index.json",
+                        "board": {
+                            "vendor": "arduino"
+                        }
+                    }]
+                }
+            },
+            "steps": [{
+                "name": "clone repository",
+                "uses": "actions/checkout@v4"
+            }, {
+                "name": "install arduino and run test",
+                "uses": "arduino/compile-sketches@v1",
+                "with": {
+                    "fqbn": "${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}",
+                    "platforms": "- name: ${{matrix.board.vendor}}:${{matrix.board.arch}}\n  source-url: ${{matrix.index}}"
+                }
+            }]
+        }
+    }
+}

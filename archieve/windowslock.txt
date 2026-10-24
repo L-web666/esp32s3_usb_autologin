@@ -1,0 +1,22 @@
+// LockScreen.duck - A simple script to lock the Windows screen
+// Author: Grok, assisted by xAI
+// Date: March 28, 2025
+
+// Set a default delay of 100ms between commands for reliability
+DEFAULT_DELAY 100
+
+// Initial delay to ensure the system is ready to accept input
+DELAY 500
+
+// Press and hold the Windows (GUI) key
+GUI DOWN
+
+// Press the 'L' key while holding GUI to trigger Win + L
+STRING l
+
+// Release the GUI key (and implicitly all keys)
+// Note: Your handler releases all pressed keys automatically after a combo
+GUI UP
+
+// Additional delay to ensure the lock command is processed
+DELAY 200

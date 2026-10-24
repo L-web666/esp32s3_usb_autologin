@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /*
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        */
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            /* Full height of viewport */
+            display: flex;
+            justify-content: center;
+            /* Centers horizontally */
+            align-items: center;
+            /* Centers vertically */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        input {
+            background: #333;
+            color: #fff;
+            border: 1px solid #fff;
+            width: 95%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: medium;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: medium;
+        }
+
+        button:hover {
+            background-color: #444;
+        }
+
+        .message {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" value="admin">
+        <input type="password" id="password" placeholder="Password" value="pass">
+        <button onclick="login()">Login</button>
+        <br />
+        <button onclick="logout()">Logout</button>
+        <p class="message" id="message"></p>
+    </div>
+
+    <script>
+
+        function logout() {
+            // Call the logout API
+            fetch("/auth/logout", {
+                method: "POST",
+                credentials: "include" // Ensures cookies are sent with the request
+            }).then(response => response.json()).then(data => {
+                console.log(data.message);
+
+                // Force expiration on client-side as a fallback
+                document.cookie = "session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+
+                // Redirect to login page
+                window.location.href = "/login.html";
+            }).catch(error => console.error("Logout failed", error));
+        }
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const messageElement = document.getElementById("message");
+
+            if (!username || !password) {
+                messageElement.textContent = "Please enter both username and password.";
+                return;
+            }
+
+            try {
+                const response = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password }),
+                    credentials: "include",
+                    redirect: "manual" // 🚀 This prevents fetch() from following redirects automatically
+                });
+
+                // Read raw response (use text() instead of json() first to debug)
+                const rawResponse = await response.text();
+                console.log("Raw Response:", rawResponse);
+
+                // Ensure response is actually JSON before parsing
+                if (!response.headers.get("Content-Type")?.includes("application/json")) {
+                    throw new Error("Server returned non-JSON response.");
+                }
+
+                // Parse JSON response
+                const result = JSON.parse(rawResponse);
+
+                if (response.ok) {
+                    messageElement.style.color = "green";
+                    messageElement.textContent = "Login successful!";
+                    setTimeout(() => { window.location.href = "/secure/secure.html"; }, 1000);
+                } else {
+                    messageElement.style.color = "red";
+                    messageElement.textContent = result.message || "Login failed.";
+                }
+            } catch (error) {
+                messageElement.style.color = "red";
+                messageElement.textContent = "An error occurred. Please try again.";
+                console.error("Login error:", error);
+            }
+        }
+
+        /*
+
+        function logout() {
+            document.cookie = "session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+            window.location.href = "/login.html";
+        }
+
+        async function login() {
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+                const messageElement = document.getElementById("message");
+    
+                if (!username || !password) {
+                    messageElement.textContent = "Please enter both username and password.";
+                    return;
+                }
+    
+                try {
+                    const response = await fetch("/auth/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ username, password }),
+                        credentials: "include"
+                    });
+    
+                    const contentType = response.headers.get("Content-Type");
+    
+                    if (!contentType || !contentType.includes("application/json")) {
+                        throw new Error("Server did not return JSON");
+                    }
+    
+                    const result = await response.json();
+    
+                    if (response.ok) {
+                        messageElement.style.color = "green";
+                        messageElement.textContent = "Login successful!";
+                        setTimeout(() => {
+                            window.location.href = "/";
+                        }, 1000);
+                    } else {
+                        messageElement.style.color = "red";
+                        messageElement.textContent = result.message || "Login failed.";
+                    }
+                } catch (error) {
+                    messageElement.style.color = "red";
+                    messageElement.textContent = "An error occurred. Please try again.";
+                    console.error("Login error:", error);
+                }
+            }
+        */
+
+    </script>
+</body>
+
+</html>

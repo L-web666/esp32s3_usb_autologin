@@ -1,0 +1,64 @@
+<mxfile host="65bd71144e">
+    <diagram name="PassTxt Architecture" id="0">
+        <mxGraphModel dx="753" dy="385" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="ESP32" value="PassTxt (ESP32-S3) - USB HID - Bluetooth - Web Server - MQTT - Storage" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="190" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="USB" value="USB Devices" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="20" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="BT" value="Bluetooth Devices" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="120" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="WEB" value="Web Interface" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="220" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="MQTT" value="MQTT Broker / Cloud" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="320" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="HID" value="USB HID Output" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="20" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="SCRIPT" value="Macro &amp; Script Engine" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="120" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="STORAGE" value="Storage (LittleFS)" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="310" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="USB HID" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="USB" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="Bluetooth Control" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="BT" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" value="Web UI" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="WEB" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" value="MQTT Pub/Sub" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="MQTT" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" value="Keystrokes/Mouse" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="HID" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" value="Run Macros" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="SCRIPT" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="Read/Write" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="ESP32" target="STORAGE" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="HID" target="USB" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="SCRIPT" target="HID" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="SCRIPT" target="MQTT" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

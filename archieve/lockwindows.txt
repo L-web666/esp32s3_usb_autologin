@@ -1,0 +1,7 @@
+REM LOCK WINDOWS BEGIN
+DEFAULTDELAY 500
+hid processkey GUI press
+hid processkey L press
+hid processkey GUI release
+hid processkey L release
+REM LOCK WINDOWS END

@@ -1,0 +1,27 @@
+@baseUrl = http://demo1.local
+@token = test
+
+### Get
+GET {{baseUrl}}/device/info
+Authorization: Bearer {{token}}
+###
+
+### Timezones
+GET {{baseUrl}}/device/timezones
+Authorization: Bearer {{token}}
+###
+
+### Scan networks
+GET {{baseUrl}}/device/wifi/networks
+Authorization: Bearer {{token}}
+###
+
+### Reboot
+GET {{baseUrl}}/device/reboot
+Authorization: Bearer {{token}}
+###
+
+### Format device
+GET {{baseUrl}}/device/format
+Authorization: Bearer {{token}}
+###

@@ -1,0 +1,8 @@
+crontab add "1-15 * * * *" "tft print white"
+crontab add "1-15 * * * *" "led color white"
+crontab add "15-30 * * * *" "tft print green"
+crontab add "15-30 * * * *" "led color green"
+crontab add "30-45 * * * *" "tft print blue"
+crontab add "30-45 * * * *" "led color blue"
+crontab add "45-59 * * * *" "tft print purple"
+crontab add "45-59 * * * *" "led color purple"

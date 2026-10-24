@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <script type="module" src="/webtools/install-button.js?module"></script>
+  <title>Web Installer</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>Web Installer</h1>
+    <!-- <p>Select firmware:</p> -->
+    <select id="firmware-select" class="btn"></select>
+    <br />
+    <esp-web-install-button manifest="" id="install-button">
+      <button slot="activate">Install</button>
+      <!-- 
+      <span slot="unsupported">Ah snap, your browser doesn't work!</span>
+      <span slot="not-allowed">Ah snap, you are not allowed to use this on HTTP!</span> 
+      -->
+    </esp-web-install-button>
+    <br />
+    <a href="https://mdelgert.github.io/PassTxt/blueserial.html" target="_blank">Blue Serial</a>
+  </div>
+  <script type="module">
+    const GITHUB_API_URL = "https://api.github.com/repos/mdelgert/PassTxt/releases";
+    const firmwareSelect = document.getElementById('firmware-select');
+    const installButton = document.getElementById('install-button');
+
+    async function fetchReleases() {
+      try {
+        const response = await fetch(GITHUB_API_URL);
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.statusText}`);
+        }
+        const releases = await response.json();
+        populateDropdown(releases);
+      } catch (error) {
+        console.error("Failed to fetch releases:", error);
+      }
+    }
+
+    // Make sure this matches tools/manifests.py
+    function populateDropdown(releases) {
+      const limitedReleases = releases.slice(0, 10); // Limit to the last 3 releases
+      limitedReleases.forEach((release) => {
+        const tagName = release.tag_name;
+        const manifestPath = `firmware/${tagName}.json`;
+
+        // Create an option element for each release
+        const option = document.createElement('option');
+        option.value = manifestPath;
+        option.textContent = `${tagName}`;
+        firmwareSelect.appendChild(option);
+      });
+
+      // Set default manifest in install button
+      if (limitedReleases.length > 0) {
+        installButton.setAttribute('manifest', `firmware/${limitedReleases[0].tag_name}.json`);
+      }
+    }
+
+    // Event listener for dropdown change
+    firmwareSelect.addEventListener('change', (event) => {
+      const selectedManifest = event.target.value;
+      installButton.setAttribute('manifest', selectedManifest);
+    });
+
+    // Override the default checkSameFirmware function
+    const button = document.querySelector('esp-web-install-button');
+    button.overrides = {
+      checkSameFirmware(manifest, improvInfo) {
+        const manifestFirmware = manifest.name.toLowerCase();
+        const deviceFirmware = improvInfo.firmware.toLowerCase();
+        return manifestFirmware.includes(deviceFirmware);
+      }
+    };
+
+    // Initialize dropdown on page load
+    fetchReleases();
+  </script>
+</body>
+
+</html>

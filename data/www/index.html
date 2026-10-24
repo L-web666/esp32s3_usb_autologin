@@ -1,0 +1,29 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Home</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Device Info Page displaying ESP32 hardware and system information." />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script type="module" src="/js/index.js" defer></script>
+</head>
+<body>
+  <div id="navbar-container"></div>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody id="device-info"></tbody>
+    </table>
+    <button class="nav-link buttonLarge" id="rebootButton" type="button">Reboot</button>
+    <div id="message-box" class="message-box hidden" aria-live="polite" role="alert"></div>
+    <div id="footer-container"></div>
+  </main>
+</body>
+</html>

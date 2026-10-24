@@ -1,0 +1,248 @@
+/* Root Variables for Consistent Theme */
+:root {
+  --background-color: #121212;
+  --nav-bg: #222;
+  --text-color: #fff;
+  --button-bg: #333;
+  --button-border: #444;
+  --button-hover-bg: #555;
+  --table-border: #ddd;
+  --success-bg: #28a745;
+  --error-bg: #dc3545;
+  --message-box-bg: #4caf50;
+  --base-font-size: 1rem;
+  --max-width: 75rem;
+  --border-radius: 5px;
+  --padding-small: 0.625rem; /* 10px */
+  --padding-large: 1rem; /* 16px */
+}
+
+/* Global Resets and Layout */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-size: var(--base-font-size);
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+main {
+  text-align: center;
+  width: 100%;
+  padding: var(--padding-small);
+  padding-bottom: 60px; /* Footer height */
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: var(--nav-bg);
+  padding: var(--padding-small);
+  width: 100%;
+}
+
+.nav-link {
+  display: inline-block;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  text-decoration: none;
+  padding: var(--padding-small) var(--padding-large);
+  margin: 5px;
+  border: 1px solid var(--button-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.nav-link[aria-current="page"] {
+  background-color: #1a1a1a;
+}
+
+@media (max-width: 300px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: var(--padding-large);
+    text-align: center;
+  }
+}
+
+/* Form */
+.settings-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding-small);
+}
+
+label {
+  font-size: 1.2rem;
+  text-align: left;
+  margin-bottom: var(--padding-small);
+}
+
+input, textarea, button {
+  width: 100%;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--button-border);
+  border-radius: var(--border-radius);
+  padding: var(--padding-large);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+input:focus, textarea:focus, button:hover {
+  outline: none;
+  border-color: var(--button-hover-bg);
+}
+
+/* Override for Buttons */
+button {
+  width: auto;
+}
+
+.buttonLarge {
+  width: 25%;
+  /* max-width: var(--max-width); */
+}
+
+textarea {
+  height: 65vh;
+  max-height: 80vh;
+  resize: none;
+}
+
+/* Table */
+table {
+  margin: var(--padding-small) auto;
+  border-collapse: collapse;
+  width: 25%;
+  max-width: var(--max-width);
+}
+
+th, td {
+  border: 1px solid var(--table-border);
+  padding: var(--padding-small);
+  text-align: left;
+}
+
+th {
+  background-color: var(--button-bg);
+}
+
+/* Footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: var(--padding-large);
+  background-color: var(--nav-bg);
+  color: var(--text-color);
+}
+
+.footer-link {
+  color: var(--text-color);
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+.message-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  padding: var(--padding-large);
+  text-align: center;
+  font-weight: bold;
+  color: var(--text-color);
+  background-color: var(--message-box-bg);
+  z-index: 9999;
+}
+
+.message-box.success {
+  background-color: var(--success-bg);
+}
+
+.message-box.error {
+  background-color: var(--error-bg);
+}
+
+/* Wi-Fi Network Group Styling */
+.form-group select {
+  margin-bottom: var(--padding-small);
+}
+
+select {
+  width: 100%;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--button-border);
+  border-radius: var(--border-radius);
+  padding: var(--padding-large);
+  font-size: 1rem;
+  box-sizing: border-box;
+  appearance: none; /* Removes default arrow styling */
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--button-hover-bg);
+}
+
+select option {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+}
+
+.checkbox-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr; /* Checkbox in the first column, label in the second */
+  align-items: center;
+  gap: 3.5rem; /* Space between checkbox and label */
+}
+
+input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  margin-left: 2.5rem; /* Add spacing between label and checkbox */
+}
+
+

@@ -1,0 +1,117 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Device API",
+    "version": "1.0.0",
+    "description": "API documentation for endpoints"
+  },
+  "servers": [
+    {
+      "url": "",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/files": {
+      "get": {
+        "summary": "Retrieve files from the device",
+        "responses": {
+          "200": {
+            "description": "Returns files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "data": {
+                    "device": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/get": {
+      "get": {
+        "summary": "Retrieve device settings",
+        "responses": {
+          "200": {
+            "description": "Returns the current settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "data": {
+                    "device": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/set": {
+      "post": {
+        "summary": "Set device settings",
+        "responses": {
+          "200": {
+            "description": "Returns the current settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "data": {
+                    "device": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/device/reboot": {
+      "get": {
+        "summary": "Reboots the ESP32 device",
+        "responses": {
+          "200": {
+            "description": "Device rebooting..."
+          }
+        }
+      }
+    },
+    "/device/info": {
+      "get": {
+        "summary": "Retrieve device settings",
+        "responses": {
+          "200": {
+            "description": "Returns the current settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "type": "object"
+                    },
+                    "wifi": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

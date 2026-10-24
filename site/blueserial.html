@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bluetooth Web Serial Terminal</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #terminal {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+            font-family: monospace;
+            font-size: 16px;
+        }
+
+        #input-area {
+            display: flex;
+            border-top: 1px solid #333;
+        }
+
+        #input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: monospace;
+            font-size: 16px;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+
+        #connect {
+            background-color: #333;
+            color: #d4d4d4;
+            border: none;
+            padding: 10px;
+            font-family: monospace;
+            cursor: pointer;
+        }
+
+        #connect:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal"></div>
+    <div id="input-area">
+        <button id="connect">Connect</button>
+        <input type="text" id="input" placeholder="Type your message here..." autocomplete="off" />
+    </div>
+
+    <script>
+        let bleDevice = null;
+        let txCharacteristic = null;
+        let rxCharacteristic = null;
+
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('input');
+        const connectButton = document.getElementById('connect');
+
+        // Append messages to the terminal
+        function appendMessage(message, isOwnMessage = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.textContent = (isOwnMessage ? 'You: ' : 'Device: ') + message;
+            terminal.appendChild(msgDiv);
+            terminal.scrollTop = terminal.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // Clear the terminal content
+        function clearTerminal() {
+            terminal.innerHTML = ''; // Remove all child elements
+        }
+        connectButton.addEventListener('click', async () => {
+            try {
+                appendMessage('Requesting Bluetooth device...');
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] // Corrected NUS Service UUID
+                });
+
+                appendMessage('Connecting to GATT server...');
+                const server = await bleDevice.gatt.connect();
+
+                appendMessage('Getting NUS service...');
+                const service = await server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+
+                appendMessage('Getting RX characteristic...');
+                rxCharacteristic = await service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
+
+                appendMessage('Getting TX characteristic...');
+                txCharacteristic = await service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e');
+
+                appendMessage('Connected to device!');
+
+                // Start listening for notifications from TX characteristic
+                await txCharacteristic.startNotifications();
+                txCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+                    const value = new TextDecoder().decode(event.target.value);
+                    appendMessage(value, false);
+                });
+            } catch (error) {
+                appendMessage(`Error: ${error.message}`);
+            }
+        });
+
+
+        // Handle input messages
+        input.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                const message = input.value.trim();
+                if (message) {
+                    if (message.toLowerCase() === 'clear') {
+                        clearTerminal();
+                    } else if (rxCharacteristic) {
+                        const encoder = new TextEncoder();
+                        await rxCharacteristic.writeValue(encoder.encode(message));
+                        appendMessage(message, true);
+                    } else {
+                        appendMessage('Not connected to a device.', false);
+                    }
+                    input.value = ''; // Clear the input field
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

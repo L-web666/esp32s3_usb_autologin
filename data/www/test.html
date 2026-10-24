@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-actions select,
+        .filter-actions button {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        .filter-actions button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .filter-actions button:hover {
+            background-color: #0056b3;
+        }
+        #itemList {
+            list-style: none;
+            padding: 0;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        .modal-error {
+            color: #ff5555;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-section h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #444;
+            color: #fff;
+            font-size: 1em;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-group .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .form-group .generate-password {
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        .form-group .generate-password:hover {
+            background-color: #0056b3;
+        }
+        #new-category-box {
+            display: none;
+            margin-top: 10px;
+        }
+        .new-category-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .new-category-actions button {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .new-category-error {
+            color: #ff5555;
+            margin-top: 5px;
+            display: none;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .modal-footer .closeModalFooter {
+            background-color: #666;
+            color: #fff;
+        }
+        .modal-footer .saveChanges {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .modal-footer .closeModalFooter:hover {
+            background-color: #555;
+        }
+        .modal-footer .saveChanges:hover {
+            background-color: #0056b3;
+        }
+        .required::after {
+            content: " *";
+            color: #ff5555;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-container"></div>
+    <main>
+        <div class="container">
+            <div id="filterContainer">
+                <div class="filter-actions">
+                    <select id="categoryFilter" aria-label="Filter by category">
+                        <option value="all">All</option>
+                    </select>
+                    <button id="addButton">Add Button</button>
+                </div>
+            </div>
+            <ul id="itemList" aria-label="List of buttons"></ul>
+        </div>
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Add New Button</h2>
+                    <button id="closeModal" aria-label="Close modal">X</button>
+                </div>
+                <div class="modal-error" id="modalError"></div>
+                <div class="modal-body">
+                    <!-- Button Details Section -->
+                    <div class="form-section">
+                        <h3>Button Details</h3>
+                        <div class="form-group">
+                            <label for="editName" class="required">Button Label</label>
+                            <input type="text" id="editName" placeholder="e.g., Work Email" required aria-label="Button Label" aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDeviceAction" class="required">Action Type</label>
+                            <select id="editDeviceAction" aria-label="Select action">
+                                <option value="1">Password</option>
+                                <option value="2">Command</option>
+                                <option value="3">Script</option>
+                            </select>
+                        </div>
+                        <div id="passwordFields" class="action-fields">
+                            <div class="form-group">
+                                <label for="editPasswordAction">Password Action</label>
+                                <select id="editPasswordAction" aria-label="Select password action">
+                                    <option value="1">Tab</option>
+                                    <option value="2">Enter</option>
+                                    <option value="3">None</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editUserName">User Name</label>
+                                <input type="text" id="editUserName" placeholder="e.g., john.doe@example.com" aria-label="User Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="editUserPassword">Password</label>
+                                <input type="password" id="editUserPassword
+
+" placeholder="e.g., Xy#9mP!q" aria-label="Password">
+                                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                                <button type="button" class="generate-password" onclick="generatePassword()">Generate Password</button>
+                            </div>
+                        </div>
+                        <div id="commandFields" class="action-fields hidden">
+                            <div class="form-group">
+                                <label for="editCommand" class="required">Command</label>
+                                <input type="text" id="editCommand" placeholder="e.g., ssh user@host" required aria-label="Command" aria-required="true">
+                            </div>
+                        </div>
+                        <div id="new-script-box" class="action-fields hidden">
+                            <div class="form-group">
+                                <label for="editScript" class="required">Script</label>
+                                <select id="editScript" aria-label="Select script">
+                                    <option value="">Select a script</option>
+                                    <option value="script1">Script 1</option>
+                                    <option value="script2">Script 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Settings Section -->
+                    <div class="form-section">
+                        <h3>General Settings</h3>
+                        <div class="form-group">
+                            <label for="editCategory">Category</label>
+                            <select id="editCategory" aria-label="Select category">
+                                <option value="personal">Personal</option>
+                                <option value="work">Work</option>
+                                <option value="other">Other</option>
+                                <option value="new">Add New Category...</option>
+                            </select>
+                        </div>
+                        <div id="new-category-box">
+                            <div class="form-group">
+                                <label for="new-category-name">New Category Name</label>
+                                <input type="text" id="new-category-name" placeholder="e.g., Social Media" aria-label="New category name">
+                            </div>
+                            <div class="new-category-error" id="newCategoryError"></div>
+                            <div class="new-category-actions">
+                                <button id="save-new-category">Save</button>
+                                <button id="cancel-new-category">Cancel</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editNotes">Notes (optional)</label>
+                            <textarea id="editNotes" placeholder="e.g., Security question: What’s your pet’s name?" aria-label="Notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeModalFooter">Cancel</button>
+                    <button id="saveChanges">Save</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="footer-container"></div>
+
+    <script>
+        // Initialize the modal and button functionality
+        const addButton = document.getElementById('addButton');
+        const editModal = document.getElementById('editModal');
+        const closeModal = document.getElementById('closeModal');
+        const closeModalFooter = document.getElementById('closeModalFooter');
+        const saveChanges = document.getElementById('saveChanges');
+        const editDeviceAction = document.getElementById('editDeviceAction');
+        const passwordFields = document.getElementById('passwordFields');
+        const commandFields = document.getElementById('commandFields');
+        const scriptBox = document.getElementById('new-script-box');
+        const editCategory = document.getElementById('editCategory');
+        const newCategoryBox = document.getElementById('new-category-box');
+        const saveNewCategory = document.getElementById('save-new-category');
+        const cancelNewCategory = document.getElementById('cancel-new-category');
+
+        // Show modal when "Add Button" is clicked
+        addButton.addEventListener('click', () => {
+            editModal.style.display = 'flex';
+            document.getElementById('modalTitle').textContent = 'Add New Button';
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+        closeModalFooter.addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+
+        // Save changes (for demo purposes)
+        saveChanges.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Button successfully added!');
+            editModal.style.display = 'none';
+        });
+
+        // Toggle fields based on action type
+        editDeviceAction.addEventListener('change', () => {
+            passwordFields.classList.add('hidden');
+            commandFields.classList.add('hidden');
+            scriptBox.classList.add('hidden');
+
+            if (editDeviceAction.value === '1') {
+                passwordFields.classList.remove('hidden');
+            } else if (editDeviceAction.value === '2') {
+                commandFields.classList.remove('hidden');
+            } else if (editDeviceAction.value === '3') {
+                scriptBox.classList.remove('hidden');
+            }
+        });
+
+        // Toggle new category input
+        editCategory.addEventListener('change', () => {
+            newCategoryBox.style.display = editCategory.value === 'new' ? 'block' : 'none';
+        });
+
+        // Save new category (for demo purposes)
+        saveNewCategory.addEventListener('click', () => {
+            const newCategoryName = document.getElementById('new-category-name').value;
+            if (newCategoryName) {
+                const newOption = document.createElement('option');
+                newOption.value = newCategoryName.toLowerCase();
+                newOption.textContent = newCategoryName;
+                editCategory.insertBefore(newOption, editCategory.lastElementChild);
+                editCategory.value = newCategoryName.toLowerCase();
+                newCategoryBox.style.display = 'none';
+            } else {
+                document.getElementById('newCategoryError').textContent = 'Please enter a category name.';
+                document.getElementById('newCategoryError').style.display = 'block';
+            }
+        });
+
+        // Cancel new category
+        cancelNewCategory.addEventListener('click', () => {
+            newCategoryBox.style.display = 'none';
+            editCategory.value = 'personal';
+        });
+
+        // Toggle Password Visibility
+        function togglePassword() {
+            const passwordField = document.getElementById('editUserPassword');
+            const toggleIcon = document.querySelector('.toggle-password');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.textContent = '👁️‍🗨️';
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.textContent = '👁️';
+            }
+        }
+
+        // Simple Password Generator
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('editUserPassword').value = password;
+            document.getElementById('editUserPassword').type = 'text';
+            document.querySelector('.toggle-password').textContent = '👁️‍🗨️';
+        }
+    </script>
+</body>
+</html>

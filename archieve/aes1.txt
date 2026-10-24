@@ -1,0 +1,2 @@
+aes enc test password
+aes dec uUt8tpXMI6gTzk6x6b3YEvgMPZDCpp09jqAF8AdftTo= password

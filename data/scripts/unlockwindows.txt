@@ -1,0 +1,3 @@
+REM unlock windows 11
+ENTER
+DELAY 1000

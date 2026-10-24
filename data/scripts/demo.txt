@@ -1,0 +1,7 @@
+REM DUCKY DEMO SCRIPT
+COMMAND tft print white
+COMMAND mqtt topic passtxt/demo white
+COMMAND led color white
+DELAY 1000
+REM turn led off
+COMMAND led color black

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AES Encryption & Decryption (ChatGPT-style Dark Theme)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <link rel="stylesheet" href="index.css" />
+  <style></style>
+</head>
+<body>
+  <div class="container">
+    <h2>AES Encryption</h2>
+    
+    <label for="textToEncrypt">Text to encrypt:</label>
+    <input type="text" id="textToEncrypt" placeholder="Enter text to encrypt" />
+    
+    <label for="encryptionKey">Encryption Key (Password):</label>
+    <input type="text" id="encryptionKey" placeholder="Enter key for encryption" />
+    
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    
+    <h3>Encrypted Text (Base64):</h3>
+    <textarea id="encryptedOutput" rows="4"></textarea>
+    
+    <h3>Decrypted Text:</h3>
+    <textarea id="decryptedOutput" rows="4"></textarea>
+  </div>
+
+  <script>
+
+  function encrypt() {
+      const textToEncrypt = document.getElementById('textToEncrypt').value;
+      const encryptionKey = document.getElementById('encryptionKey').value;
+      if (!textToEncrypt || !encryptionKey) {
+          alert("Please enter both text and a key.");
+          return;
+      }
+
+      // Derive a 32-byte key using SHA-256
+      const key = CryptoJS.SHA256(encryptionKey);
+
+      // Generate a random IV (16 bytes for AES-256 CBC)
+      const iv = CryptoJS.lib.WordArray.random(16);
+
+      // Encrypt using AES-CBC with Pkcs7 padding
+      const encrypted = CryptoJS.AES.encrypt(textToEncrypt, key, {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+      });
+
+      // Prepend IV to ciphertext and Base64 encode
+      const encryptedBase64 = CryptoJS.enc.Base64.stringify(iv.concat(encrypted.ciphertext));
+
+      document.getElementById('encryptedOutput').value = encryptedBase64;
+  }
+
+  function decrypt() {
+      const encryptedBase64 = document.getElementById('encryptedOutput').value;
+      const encryptionKey = document.getElementById('encryptionKey').value;
+      if (!encryptedBase64 || !encryptionKey) {
+          alert("Please enter both encrypted text and the encryption key.");
+          return;
+      }
+
+      // Derive a 32-byte key using SHA-256
+      const key = CryptoJS.SHA256(encryptionKey);
+
+      // Decode Base64 and extract IV (first 16 bytes) and ciphertext
+      const encryptedRaw = CryptoJS.enc.Base64.parse(encryptedBase64);
+      const iv = CryptoJS.lib.WordArray.create(encryptedRaw.words.slice(0, 4)); // First 16 bytes
+      const ciphertext = CryptoJS.lib.WordArray.create(encryptedRaw.words.slice(4)); // Remaining bytes
+
+      // Decrypt using AES-CBC
+      const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+      });
+
+      document.getElementById('decryptedOutput').value = decrypted.toString(CryptoJS.enc.Utf8);
+  }
+  </script>
+</body>
+</html>

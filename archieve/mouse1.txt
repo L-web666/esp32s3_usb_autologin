@@ -1,0 +1,7 @@
+REM Start of script
+DEFAULTDELAY 1000
+TFT PRINT hello1
+TFT PRINT hello2
+TFT PRINT hello3
+REM End of script
+REPEAT 3

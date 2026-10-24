@@ -1,0 +1,6 @@
+REM Start of script
+DEFAULTDELAY 1000
+LED color green
+LED color purple
+REM End of script
+REPEAT 30

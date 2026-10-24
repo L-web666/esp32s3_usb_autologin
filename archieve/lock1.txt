@@ -1,0 +1,12 @@
+REM LOCK
+hid processkey CTRL press
+hid processkey ALT press
+hid processkey DELETE press
+
+REM RELEASE
+hid processkey CTRL release
+hid processkey ALT release
+hid processkey DELETE release
+
+DELAY 500
+hid tapkey ENTER

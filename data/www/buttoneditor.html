@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button Editor</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/buttoneditor.css" />
+  <script type="module" src="/js/global.js" defer></script>
+  <script type="module" src="/js/buttoneditor.js" defer></script>
+</head>
+<body>
+  <div id="navbar-container"></div>
+  <main>
+    <div class="container">
+      <div id="filterContainer">
+        <div class="filter-actions">
+          <select id="categoryFilter" aria-label="Filter by category">
+            <option value="all">All</option>
+          </select>
+          <button id="addButton">Add Button</button>
+        </div>
+      </div>
+      <ul id="itemList" aria-label="List of buttons"></ul>
+    </div>
+    <div class="modal" id="editModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Edit Button</h2>
+          <button id="closeModal" aria-label="Close modal">X</button>
+        </div> 
+        <div class="modal-error" id="modalError"></div>
+        <div class="modal-body">
+          <!-- Button Details Fields -->
+          <div class="form-group">
+            <label for="editName" class="required">Button Label</label>
+            <input type="text" id="editName" placeholder="e.g., Work Email" required aria-label="Button Label" aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="editDeviceAction" class="required">Action Type</label>
+            <select id="editDeviceAction" aria-label="Select action">
+              <option value="1">Password</option>
+              <option value="2">Command</option>
+              <option value="3">Script</option>
+            </select>
+          </div>
+          <div id="passwordFields" class="action-fields">
+            <div class="form-group">
+              <label for="editUserName">Username</label>
+              <input type="text" id="editUserName" placeholder="e.g., john.doe@example.com" aria-label="User Name">
+            </div>
+            <div class="form-group">
+              <label for="editUsernameAction">Keypress (after username)</label>
+              <select id="editUsernameAction" aria-label="Select username action">
+                <option value="0">None</option>
+                <option value="1">Tab</option>
+                <option value="2">Enter</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editUserPassword">Password</label>
+              <div class="password-wrapper">
+                <input type="password" id="editUserPassword" placeholder="e.g., Xy#9mP!q" aria-label="Password">
+                <span class="toggle-password">
+                  <!-- Eye Open (Show Password) -->
+                  <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <!-- Eye Closed with Slash (Hide Password) -->
+                  <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </span>
+              </div>
+              <button type="button" class="generate-password">Generate Password</button>
+            </div>
+            <div class="form-group">
+              <label for="editPasswordAction">Keypress (after password)</label>
+              <select id="editPasswordAction" aria-label="Select password action">
+                <option value="0">None</option>
+                <option value="1">Tab</option>
+                <option value="2">Enter</option>
+              </select>
+            </div>
+          </div>
+          <div id="commandFields" class="action-fields hidden">
+            <div class="form-group">
+              <label for="editCommand" class="required">Command</label>
+              <input type="text" id="editCommand" placeholder="e.g., led color white" required aria-label="Command" aria-required="true">
+            </div>
+          </div>
+          <div id="new-script-box" class="action-fields hidden">
+            <div class="form-group">
+              <label for="editScript" class="required"><a href="/files.html" target="_blank">Script</a></label>
+              <select id="editScript" aria-label="Select script"></select>
+            </div>
+          </div>
+          <!-- Visual Separator -->
+          <div class="form-separator"></div>
+          <!-- General Settings Fields -->
+          <div class="form-group">
+            <label for="editCategory">Category</label>
+            <select id="editCategory" aria-label="Select category"></select>
+          </div>
+          <div id="new-category-box">
+            <div class="form-group">
+              <label for="new-category-name">New Category Name</label>
+              <input type="text" id="new-category-name" placeholder="e.g., Social Media" aria-label="New category name">
+            </div>
+            <div class="new-category-error" id="newCategoryError"></div>
+            <div class="new-category-actions">
+              <button id="save-new-category">Save</button>
+              <button id="cancel-new-category">Cancel</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editNotes">Notes (optional)</label>
+            <textarea id="editNotes" placeholder="e.g., Security question: What’s your pet’s name?" aria-label="Notes"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="closeModalFooter">Cancel</button>
+          <button id="saveChanges">Save</button>
+        </div>
+      </div>
+    </div>
+    <div id="footer-container"></div>
+  </main>
+  <script type="module">
+    import { init } from '/js/buttoneditor.js';
+    init();
+  </script>
+</body>
+</html>

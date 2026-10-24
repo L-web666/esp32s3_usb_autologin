@@ -1,0 +1,350 @@
+ /* files.css */
+ body {
+     font-family: Arial, sans-serif;
+     margin: 0;
+     padding: 0;
+     background-color: #1e1e1e;
+     color: #d4d4d4;
+     display: flex;
+     flex-direction: column;
+     height: 100vh;
+ }
+
+ button {
+     /* padding: 10px 16px; */
+     /* padding: 10px 10px; */
+     background: #3c3c3c;
+     color: #d4d4d4;
+     border: 1px solid #555;
+     border-radius: 4px;
+     cursor: pointer;
+     /* flex: 1 1 calc(33.33% - 20px); */
+     /* min-width: 50px; */
+     /* max-width: 200px; */
+     /* max-width: 150px; */
+ }
+
+ button:hover {
+     background: #4fc1ff;
+     color: black;
+     transition: background-color 0.2s ease, color 0.2s ease;
+ }
+
+ .container {
+     display: flex;
+     flex: 1;
+     overflow: hidden;
+ }
+
+ .sidebar {
+     /* width: 250px; */
+     width: 200px;
+     background: #252526;
+     border-right: 1px solid #3c3c3c;
+     overflow-y: auto;
+     /* padding: 10px; */
+ }
+
+ .editor {
+     flex: 1;
+     display: flex;
+     flex-direction: column;
+     overflow: hidden;
+ }
+
+ /* 
+ .editor button {
+    max-width: 125px;
+    padding: 10px 10px;
+} 
+*/
+
+ .toolbar {
+     background: #2d2d2d;
+     padding: 10px;
+     display: flex;
+     flex-wrap: wrap;
+     gap: 10px;
+     border-bottom: 1px solid #3c3c3c;
+ }
+
+ .toolbar input,
+ .toolbar select,
+ .toolbar button {
+     height: 36px;
+     padding: 0 10px;
+     border: 1px solid #555;
+     border-radius: 4px;
+     background-color: #333;
+     color: white;
+     font-size: 14px;
+ }
+
+ .toolbar button {
+     background-color: #444;
+     cursor: pointer;
+ }
+
+ .toolbar button:hover {
+     background-color: #555;
+ }
+
+ .actionIcon {
+    width: 1.5em;
+    height: 1.5em;
+    fill: currentColor;
+    padding: 5px;
+    cursor: pointer; /* Ensures the pointer cursor is shown */
+    transition: transform 0.2s ease, fill 0.2s ease; /* Smooth animation for hover effects */
+}
+
+.actionIcon:hover {
+    transform: scale(1.2); /* Slightly enlarge the icon on hover */
+    fill: #007bff; /* Change the color on hover */
+    background-color: rgba(0, 123, 255, 0.1); /* Optional: Add a subtle background color */
+    border-radius: 50%; /* Optional: Round the edges for a circular hover effect */
+}
+
+ .file-list {
+     list-style: none;
+     margin: 0;
+     padding: 0;
+ }
+
+ .file-list li {
+     display: flex;
+     align-items: center;
+     padding: 10px;
+     border-radius: 4px;
+     cursor: pointer;
+     transition: background-color 0.2s ease;
+ }
+
+ .file-list li:hover {
+     background: #3c3c3c;
+ }
+
+ .file-list .folder span {
+     font-weight: bold;
+     color: #4fc1ff;
+ }
+
+ .file-list .icon {
+     width: 1.5em;
+     height: 1.5em;
+     margin-right: 0.5em;
+     fill: currentColor;
+ }
+
+ /* Handle long file names */
+ .file-list li span {
+     display: inline-block;
+     max-width: 80%;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     vertical-align: middle;
+ }
+
+ /* Handle active file selected */
+ .file-list li.active {
+     background-color: #555;
+     color: white;
+ }
+
+ textarea {
+     flex: 1;
+     margin: 10px;
+     padding: 10px;
+     background-color: #1e1e1e;
+     color: #d4d4d4;
+     border: 1px solid #3c3c3c;
+     resize: none;
+     font-family: monospace;
+ }
+
+ .breadcrumbs {
+     padding: 10px;
+     background-color: #2d2d2d;
+     color: #d4d4d4;
+     display: flex;
+     gap: 5px;
+     align-items: center;
+     font-size: 14px;
+     border-bottom: 1px solid #3c3c3c;
+ }
+
+ .breadcrumbs span {
+     cursor: pointer;
+     text-decoration: underline;
+     margin-right: 5px;
+ }
+
+ .breadcrumbs span:hover {
+     color: #4fc1ff;
+ }
+
+ #statusMessage {
+     font-size: 14px;
+     padding: 8px 10px;
+     color: #ccc;
+ }
+
+ /* Editor container */
+ .editor-container {
+     flex: 1;
+     padding: 10px;
+     border: 1px solid #444;
+     border-radius: 5px;
+     overflow: hidden;
+ }
+
+ /* CodeMirror editor styling */
+ .CodeMirror {
+     height: 100%;
+     border: 1px solid #444;
+     border-radius: 5px;
+     font-size: 16px;
+ }
+
+ /* Custom Token Colors */
+ .cm-keyword {
+     color: #ff79c6;
+ }
+
+ .cm-string {
+     color: #f1fa8c;
+ }
+
+ .cm-number {
+     color: #bd93f9;
+ }
+
+ .cm-comment {
+     color: #6272a4;
+     /* font-style: italic; */
+ }
+
+ .cm-command {
+    color: #82aaff;
+}
+
+ .cm-subcommand {
+     /* 
+     color: #8be9fd;
+     color: #82aaff;
+     color:#c792ea;
+     color: #bd93f9;
+     color: #eff;
+     */
+     color: #ffcb6b;
+     /* font-style: italic; */
+ }
+
+ .modal {
+     display: none;
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background-color: #333;
+     padding: 20px;
+     border-radius: 8px;
+     z-index: 1000;
+     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+     width: 300px;
+ }
+
+ .modal.active {
+     display: block;
+ }
+
+ .modal button {
+     background-color: #444;
+     color: white;
+     border: 1px solid #555;
+     padding: 8px 15px;
+     margin-top: 10px;
+     border-radius: 4px;
+     font-size: 14px;
+     cursor: pointer;
+     width: 100%;
+ }
+
+ .modal button:hover {
+     background-color: #555;
+ }
+
+ .modal h3 {
+     margin-bottom: 15px;
+     color: white;
+     font-size: 18px;
+ }
+
+ .modal section {
+     margin-bottom: 20px;
+ }
+
+ .modal-overlay {
+     display: none;
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background-color: rgba(0, 0, 0, 0.5);
+     z-index: 999;
+ }
+
+ .modal-overlay.active {
+     display: block;
+ }
+
+ /* Mobile adjustments */
+ @media (max-width: 768px) {
+     .container {
+         flex-direction: column;
+     }
+
+     /*
+    .sidebar {
+        width: 100%;
+        height: 50%;
+        border-right: none;
+        border-bottom: 1px solid #3c3c3c;
+    }
+    */
+
+     .sidebar {
+         width: 100%;
+         /* Make sidebar span the full width */
+         order: 2;
+         /* Move sidebar below the editor */
+         /* height: auto; */
+         height: 25%;
+         border-right: none;
+         border-top: 1px solid #3c3c3c;
+         /* Add border on top for separation */
+     }
+
+     .editor {
+         order: 1;
+         /* Ensure editor stays above the sidebar */
+     }
+
+     button {
+         flex: 1 1 auto;
+         min-width: 80px;
+         max-width: 100%;
+     }
+
+     .file-list .icon {
+         width: 1.2em;
+         height: 1.2em;
+     }
+
+     textarea {
+         margin: 0;
+         border-radius: 0;
+     }
+ }

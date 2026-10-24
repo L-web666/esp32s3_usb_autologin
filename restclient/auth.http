@@ -1,0 +1,33 @@
+@baseUrl = http://demo1.local
+
+### Test Login - Success
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "pass"
+}
+
+### Test Login - Wrong Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "wronguser",
+    "password": "wrongpass"
+}
+
+### Test Login - Missing Fields
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin"
+}
+
+### Open Login Page (Should return HTML)
+GET {{baseUrl}}/login
+
+### Open Theme Page (Should return HTML)
+GET {{baseUrl}}/theme

@@ -1,0 +1,2 @@
+REM Script to Lock windows
+GUI l

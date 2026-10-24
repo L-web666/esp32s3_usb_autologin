@@ -1,0 +1,73 @@
+ /* General Styles */
+ body {
+    background-color: #121212; /* Dark background color */
+    color: #f5f5f5; /* Light text color */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Container Styles */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #1a1a1a; /* Slightly lighter background color */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Headers */
+  h2 {
+    color: #f5f5f5; /* Light text color for headers */
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    margin-top: 15px;
+    color: #e0e0e0; /* Lighter text color for subheaders */
+  }
+
+  /* Labels */
+  label {
+    display: block;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #ccc; /* Light gray text color for labels */
+  }
+
+  /* Input and Textarea Styles */
+  input, textarea {
+    width: 98%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px; 
+    background-color: #212121; /* Dark background color for inputs */
+    border: 1px solid #333; /* Dark border color */
+    color: #f5f5f5; /* Light text color */
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #666; /* Slightly lighter border color on focus */
+  }
+
+  /* Buttons */
+  button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #333; /* Dark button color */
+    color: #f5f5f5; /* Light text color for buttons */
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #444; /* Darker button color on hover */
+  }
+
+  button:active {
+    transform: scale(0.98); /* Subtle "press" effect */
+  }

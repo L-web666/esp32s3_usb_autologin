@@ -1,0 +1,4 @@
+REM SCRIPT BEGIN
+DEFAULTDELAY 50
+tft print hello world
+REPEAT 30

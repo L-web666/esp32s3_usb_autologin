@@ -1,0 +1,16 @@
+@baseUrl = http://demo1.local
+@token = test
+
+### send command1
+POST {{baseUrl}}/command/set
+
+tft print button1
+###
+
+### send command2
+POST {{baseUrl}}/command/set
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+script file /1.txt
+###

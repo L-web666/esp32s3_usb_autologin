@@ -1,0 +1,66 @@
+@baseUrl = http://demo1.local
+@token = test
+
+### Get settings
+GET {{baseUrl}}/settings/get
+Authorization: Bearer {{token}}
+
+###
+
+### Set settings1
+POST {{baseUrl}}/settings/set
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device": {
+      "name": "MyDevice",
+      "singleClick": "test1",
+      "setupMode": false,
+      "timezone": "America/New_York",
+      "bootCount": 0,
+      "bootTime": 0,
+      "defaultTimeout": 500
+    },
+    "wifi": {
+      "ssid": "MyNetwork",
+      "password": "wifiPassword",
+      "scan": true
+    },
+    "mqtt": {
+      "enabled": false,
+      "server": "mqtt.example.com",
+      "port": 1883,
+      "ssl": false,
+      "username": "user",
+      "password": "pass",
+      "subTopic": "device/in",
+      "pubTopic": "device/out"
+    },
+    "security": {
+      "apiKey": "abcdef123456",
+      "apiToken": false,
+      "otaPassword": "password"
+    },
+    "features": {
+      "cors": false,
+      "webHandler": true
+    }
+}
+
+###
+
+### Set settings2
+POST {{baseUrl}}/settings/set
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "device": {
+      "singleClick": "password1"
+    },
+    "security": {
+      "apiKey": "abcdef1234567"
+    }
+}
+###

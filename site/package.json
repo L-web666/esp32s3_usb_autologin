@@ -1,0 +1,21 @@
+{
+  "name": "site",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "clean": "rm -rf dist",
+    "clean-build": "npm run clean && npm run build",
+    "preview": "vite preview",
+    "full": "npm run clean-build && npm run preview",
+    "start": "npm run dev",
+    "serve": "vite preview --host",
+    "analyze": "vite build --mode analyze",
+    "server": "npm run dev -- --host"
+  },
+  "devDependencies": {
+    "vite": "^6.0.5"
+  }
+}

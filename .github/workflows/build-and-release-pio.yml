@@ -1,0 +1,39 @@
+name: PlatformIO Build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Set up PlatformIO
+        run: |
+          python3 -m pip install -U pip
+          pip install platformio
+
+      - name: Build firmware
+        run: |
+          pio run --environment esp32-s3-devkitc-1
+
+      - name: Debug list firmware directory
+        run: ls -R .pio/build/esp32-s3-devkitc-1
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            .pio/build/esp32-s3-devkitc-1/device.bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,137 @@
+@baseUrl = http://passtxt4.local
+@token = test
+
+### Get all files
+GET {{baseUrl}}/files
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Get all files in folder
+GET {{baseUrl}}/folder/files?path=/scripts
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Create a new file
+POST {{baseUrl}}/file?filename=/hello1.txt
+Content-Type: text/plain
+
+This is the content of the new file.
+###
+
+### Get all file anmd folder names
+GET {{baseUrl}}/filemanager
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Search for json files
+GET {{baseUrl}}/search?query=json
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Search for scripts
+GET {{baseUrl}}/search?query=/scripts
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Search for text files
+GET {{baseUrl}}/search?query=txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+###
+
+### Rename a file
+POST {{baseUrl}}/rename?oldname=/test.txt&newname=/test2.txt
+Authorization: Bearer {{token}}
+
+### Create a new file
+POST {{baseUrl}}/file?filename=/hello1.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+This is the content of the new file.
+
+###
+
+### Create a new file with path
+POST {{baseUrl}}/file?filename=/hello/test1.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+Hello path1.
+
+###
+
+### Create a new file with path
+POST {{baseUrl}}/file?filename=/hello/test2.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+Hello path2.
+
+###
+
+### Read a file 1
+GET {{baseUrl}}/file?filename=/test.txt
+Authorization: Bearer {{token}}
+
+###
+
+### Read a file path
+GET {{baseUrl}}/file?filename=/hello/test.txt
+Authorization: Bearer {{token}}
+
+###
+
+### Read a file 2
+GET {{baseUrl}}/file?filename=/settings.json
+Authorization: Bearer {{token}}
+
+###
+
+### Read a file 3
+GET {{baseUrl}}/file?filename=/wifi_networks.json
+Authorization: Bearer {{token}}
+
+###
+
+### Append content to an existing file
+POST {{baseUrl}}/file?filename=/test.txt
+Authorization: Bearer {{token}}
+Content-Type: text/plain
+
+This is additional content appended to the file.
+
+###
+
+### Delete a file
+DELETE {{baseUrl}}/file?filename=/hello1.txt
+Authorization: Bearer {{token}}
+
+###
+
+### Delete a file path
+DELETE {{baseUrl}}/file?filename=/hello/test2.txt
+Authorization: Bearer {{token}}
+
+###
+
+### Error case: Attempt to read a non-existent file
+GET {{baseUrl}}/file?filename=/nonexistent.txt
+Authorization: Bearer {{token}}
+
+###
+
+### Error case: Attempt to delete a non-existent file
+DELETE {{baseUrl}}/file?filename=/nonexistent.txt
+Authorization: Bearer {{token}}

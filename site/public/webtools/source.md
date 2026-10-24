@@ -1,0 +1,1 @@
+https://github.com/Aircoookie/WLED-WebInstaller/tree/master/installer
