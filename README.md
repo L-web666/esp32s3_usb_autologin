@@ -7,7 +7,7 @@
 
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.10.0-orange)](https://platformio.org/)
 [![Arduino](https://img.shields.io/badge/arduino--esp32-2.0.17-blue)](https://github.com/espressif/arduino-esp32)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 ---
 
@@ -772,7 +772,18 @@ subprocess.run([sys.executable, "-m", "platformio", "run", "--target", "buildfs"
 
 ## License
 
-本项目继承原项目的 [MIT License](LICENSE)。
+本项目基于 [PassTxt](https://github.com/mdelgert/PassTxt) 二次开发，
+沿用其 [GNU Affero General Public License v3.0](LICENSE)（AGPL-3.0）。
+
+这意味着：
+
+- ✅ 可以自由使用、修改、分发
+- ✅ 可以商用
+- ⚠️ **修改后的源码必须以 AGPL-3.0 开源**
+- ⚠️ **如果作为网络服务提供，必须向用户提供源码**
+- ⚠️ 必须保留原作者的版权声明
+
+如果你需要闭源使用，请联系原作者获得其他授权。
 
 ---
 
