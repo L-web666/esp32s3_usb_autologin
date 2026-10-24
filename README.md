@@ -444,8 +444,8 @@ esptool --chip esp32s3 --port COM8 write_flash \
 **本地打开**（推荐，最稳）：
 
 ```bash
-# 在该目录起一个本地 HTTP 服务
-cd docs/webflasher
+# 在 docs 目录起一个本地 HTTP 服务
+cd docs
 python -m http.server 8899
 
 # 浏览器打开（必须是 Chrome / Edge / Firefox）
@@ -463,25 +463,32 @@ python -m http.server 8899
 4. 等待约 1 分钟，访问：
 
 ```
-https://<你的用户名>.github.io/<仓库名>/webflasher/
+https://<你的用户名>.github.io/<仓库名>/
 ```
+
+> ⚠️ **注意**：GitHub Pages 只会把 `/docs` 当作站点根目录，
+> 并且**只认 `docs/index.html` 作为首页**。
+> 所以烧录页的文件必须放在 `docs/` **根目录**，不能放在 `docs/webflasher/` 之类的子目录里，
+> 否则访问站点根路径会 404。
 
 **网页烧录用到的文件**（相对仓库根目录）：
 
 ```
 docs/
-└── webflasher/
-    ├── index.html                  # 烧录页面（约 9 KB）
-    ├── manifest.json               # 固件描述（约 0.3 KB）
-    └── firmware/
-        └── device.bin              # 完整镜像（7.94 MB / 8,323,072 字节）
+├── index.html                      # 烧录页面（约 9 KB）← 必须是根目录的 index.html
+├── manifest.json                   # 固件描述（约 0.3 KB）
+└── firmware/
+    └── device.bin                  # 完整镜像（7.94 MB / 8,323,072 字节）
 ```
 
 | 文件 | 完整路径 | 说明 |
 |------|----------|------|
-| 烧录页面 | `docs/webflasher/index.html` | 页面 + 操作说明 + 故障排查 |
-| 固件描述 | `docs/webflasher/manifest.json` | 芯片型号、版本、文件与偏移 |
-| 固件本体 | `docs/webflasher/firmware/device.bin` | **单文件整片镜像，偏移 `0x0`** |
+| 烧录页面 | `docs/index.html` | 页面 + 操作说明 + 故障排查 |
+| 固件描述 | `docs/manifest.json` | 芯片型号、版本、文件与偏移 |
+| 固件本体 | `docs/firmware/device.bin` | **单文件整片镜像，偏移 `0x0`** |
+
+> `docs/` 下的 `Description.md`、`Architecture.png` 等文档也会被一起发布到站点上，
+> 但它们不是网页，直接访问只会显示为文件下载，不影响烧录页正常工作。
 
 `manifest.json` 内容：
 
@@ -518,7 +525,7 @@ docs/
 
 ```bash
 pio run                     # 重新构建
-cp .pio/build/esp32-s3-devkitc-1/device.bin docs/webflasher/firmware/device.bin
+cp .pio/build/esp32-s3-devkitc-1/device.bin docs/firmware/device.bin
 ```
 
 > `device.bin` 有 7.9 MB，建议放在 **GitHub Releases** 而不是直接提交到仓库，

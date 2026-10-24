@@ -48,8 +48,8 @@ _build_output/
 # EXCEPTION: the browser flasher needs its firmware committed so that
 # visitors can install it straight from GitHub Pages. If the 7.9 MB file
 # makes the repo too heavy, move it to GitHub Releases and point
-# docs/webflasher/manifest.json at the release asset URL instead.
-!docs/webflasher/firmware/*.bin
+# docs/manifest.json at the release asset URL instead.
+!docs/firmware/*.bin
 
 # Local toolchain / package caches (slow-network offline builds)
 dl/
