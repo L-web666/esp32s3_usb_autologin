@@ -1,5 +1,5 @@
 {
-  "name": "PassTxt AutoLogin Keyboard",
+  "name": "ESP32-S3 Auto-Login Keyboard",
   "version": "1.0.10",
   "new_install_prompt_erase": true,
   "builds": [
