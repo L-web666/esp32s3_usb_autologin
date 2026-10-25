@@ -1,6 +1,6 @@
 {
   "name": "ESP32-S3 Auto-Login Keyboard",
-  "version": "2026.10.25-17add0c",
+  "version": "2026.10.25-60a410b",
   "new_install_prompt_erase": true,
   "builds": [
     {
