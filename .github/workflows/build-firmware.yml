@@ -6,7 +6,10 @@ name: Build Firmware & Update Web Flasher
 on:
   push:
     branches: [main]
-    # 只在"会影响固件"的文件变动时触发，避免改个 README 就编译半小时
+    # 只在"会影响固件"的文件变动时触发，避免改个 README 就编译半小时。
+    #
+    # 注意：.github/workflows/ 也必须列进来 —— 否则第一次添加/修改本文件时
+    # 不会触发运行，看起来像"workflow 没生效"（实际只是没满足 paths）。
     paths:
       - 'src/**'
       - 'include/**'
@@ -14,6 +17,7 @@ on:
       - 'data/**'
       - 'tools/merge.py'
       - 'platformio.ini'
+      - '.github/workflows/build-firmware.yml'
   workflow_dispatch:      # 也允许在 Actions 页面手动点按钮触发
 
 # 同一时间只跑一个，新的 push 会取消还在跑的那个
