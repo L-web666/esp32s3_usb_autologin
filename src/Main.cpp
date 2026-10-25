@@ -39,6 +39,20 @@ void setup()
   OTAHandler::init();
   CommandHandler::init();
   DeviceHandler::init();
+
+  // ---------------------------------------------------------------------------
+  // 自动登录 / 串口通道尽量提前初始化
+  // ---------------------------------------------------------------------------
+  // 依赖关系：需要 ConfigManager::init()（读设置）和 DeviceHandler::init()
+  // （USB.begin + keyboard.begin）已经跑完，所以只能放在这里。
+  //
+  // 但必须排在其余无关模块之前：Cron / SystemMonitor / Download / Aes /
+  // Crypto / Jiggle / Bluetooth / Mqtt 等初始化完才轮到这里的话，
+  // USB 枚举和"就绪检测"会被一起推迟，插上后要多等一两秒才打字。
+  // 放到 DeviceHandler 之后立刻执行，能让 USB 一就绪就开始登录。
+  AutoLoginHandler::init();
+  SerialConfigHandler::init();
+
   CronHandler::init();
   SystemMonitor::init();
   DownloadHandler::init();
@@ -48,14 +62,6 @@ void setup()
   JiggleHandler::init();
   BluetoothHandler::init();
   MqttHandler::init();
-
-  // 串口配置通道：插上电脑会多一个 COM 口，发 setpwd <密码> 即可改密码，
-  // 不用重新烧录固件。必须在 DeviceHandler::init()（USB.begin）之后。
-  SerialConfigHandler::init();
-
-  // 自动登录必须在 DeviceHandler::init() 之后：
-  // 那时 USB.begin() 和 keyboard.begin() 才把键盘挂上去。
-  AutoLoginHandler::init();
 
   CommandHandler::handleCommand(settings.device.bootCommand);
   

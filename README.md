@@ -58,7 +58,8 @@ Flash: [==        ]  23.7% (used 790845 bytes from 3342336 bytes)
 
 ```
 上电
- └─> AL_WAIT_START     等 autoLoginDelay（默认 4000ms，留给系统装 HID 驱动）
+ └─> AL_WAIT_START     轮询 tud_hid_n_ready()，等电脑完成枚举 + 挂好 HID 驱动
+                       （实测约 6.2 秒）→ 就绪后再等 150ms → 立刻开始
       └─> AL_WAKE        按一次 NUMLOCK 叫醒屏幕、进入密码输入状态
            └─> AL_WAIT_SCREEN   等 2500ms 让登录界面绘制完成
                 └─> AL_TYPE_USER   可选：输入用户名 + TAB
@@ -66,6 +67,26 @@ Flash: [==        ]  23.7% (used 790845 bytes from 3342336 bytes)
                           └─> AL_ENTER    按回车
                                └─> AL_DONE
 ```
+
+#### 为什么用「等 USB 就绪」而不是固定延时
+
+最早的做法是固定等 4 秒再打字。实测发现这块板子 **USB HID 要 6.2 秒才就绪**：
+
+```
+[AutoLogin] USB HID ready at 6203 ms
+[AutoLogin] start typing at 6353 ms (since boot)
+```
+
+也就是说，固定 4 秒时**电脑还没准备好接收按键**，前面 2 秒的字符全部丢失。
+
+现在改为每轮 `loop()` 调一次 `tud_hid_n_ready(0)`：
+
+- **一就绪就打**，不多等一秒
+- **永远不会在没准备好时打字**，从原理上消除丢字符
+- 如果插在只供电的口上（USB 一直不就绪），8 秒后会兜底继续，避免永久卡住
+
+这段 6.2 秒是 **Windows 枚举 USB 设备并加载 HID 驱动**的真实耗时，
+不是本项目代码拖慢的（把初始化顺序提前只能省 11ms，已验证）。
 
 每轮 `loop()` 只推进一步，**全程非阻塞**。这一点很重要：原项目的 `loop()` 里还跑着
 网页服务器、MQTT、显示刷新等任务，如果用一个 `delay(5000)` 顶住，
@@ -159,7 +180,7 @@ setpwd 你的Windows密码
 ```json
 "device": {
     "autoLogin": true,
-    "autoLoginDelay": 4000,
+    "autoLoginDelay": 0,
     "loginPassword": "你的Windows密码"
 }
 ```
@@ -168,7 +189,8 @@ setpwd 你的Windows密码
 
 ### 4. 使用
 
-把板子插到**原生 USB 口**（另一端插电脑），等待约 4 秒，密码会被自动输入。
+把板子插到**原生 USB 口**（另一端插电脑），USB 一就绪就会自动输入密码
+（实测约 6 秒，取决于电脑加载 HID 驱动的速度）。
 
 ---
 
@@ -236,12 +258,24 @@ $p.ReadExisting(); $p.Close()
 | 字段 | 默认 | 说明 |
 |------|------|------|
 | `autoLogin` | `false` | **总开关**，必须为 `true` 才会自动输入 |
-| `autoLoginDelay` | `5000` | 上电后等待多久才开始（毫秒）。系统慢就加大 |
+| `autoLoginDelay` | `0` | **等待策略**，见下方说明 |
 | `loginUserName` | `""` | Windows 用户名，留空则不打用户名 |
 | `loginPassword` | `""` | Windows 密码，留空则只按回车 |
 | `loginSendUserName` | `false` | `true` 时先输入用户名 + TAB |
 | `loginWakeScreen` | `true` | `true` 时先按 NumLock 叫醒屏幕 |
 | `loginEnter` | `true` | 打完密码后是否按回车 |
+
+#### `autoLoginDelay` 的三种取值
+
+| 值 | 行为 |
+|----|------|
+| **`0`（默认）** | **轮询 USB 就绪，一就绪就打**。不丢字符、不多等，推荐 |
+| `> 0` | 固定等待这么多毫秒（纯计时，不检查 USB 状态）。用于特殊场景 |
+| `< 0` | 同 `0`，但即使 USB 一直不就绪也绝不放弃等待 |
+
+> **不要为了"更快"把它设成很小的正数**（如 `500`）。
+> USB 就绪前打出的按键会被系统丢弃，表现为"密码输了一半"或"完全没反应"。
+> 想最快就用 `0`，它会自动卡在 USB 就绪的那一刻。
 
 ### 完整示例
 
@@ -252,7 +286,7 @@ $p.ReadExisting(); $p.Close()
     "timezone": "Asia/Shanghai",
     "keyPressDelay": 20,
     "autoLogin": true,
-    "autoLoginDelay": 4000,
+    "autoLoginDelay": 0,
     "loginUserName": "",
     "loginPassword": "",
     "loginSendUserName": false,
@@ -555,7 +589,8 @@ cp .pio/build/esp32-s3-devkitc-1/device.bin docs/firmware/device.bin
 | 编译 | ✅ `[SUCCESS]`，Flash 23.7%，RAM 11.9% |
 | 烧录 | ✅ 8,323,072 字节，**Hash of data verified** |
 | USB 枚举 | ✅ `VID_303A&PID_80A7` → HidUsb 键盘 |
-| 自动输入 | ✅ 打开记事本，4 秒后自动打出配置的密码 + 回车 |
+| 自动输入 | ✅ 打开记事本，USB 就绪后自动打出配置的密码 + 回车 |
+| 启动时序 | ✅ `USB HID ready at 6203 ms` → `start typing at 6353 ms` |
 | 串口命令 | ✅ `setpwd` / `getpwd` / `status` / `autologin` 全部正常 |
 | 串口改密码 | ✅ `setpwd test1234` → 立即登录打出 `test1234` |
 | 稳定性 | ✅ 擦除 coredump 后运行，读回全 `0xFF`，无崩溃 |

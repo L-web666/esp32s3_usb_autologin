@@ -15,7 +15,7 @@
       "userPassword": "password",
 
       "autoLogin": true,
-      "autoLoginDelay": 4000,
+      "autoLoginDelay": 0,
       "loginUserName": "",
       "loginPassword": "",
       "loginSendUserName": false,

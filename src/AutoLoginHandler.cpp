@@ -5,13 +5,26 @@
 #include "DeviceHandler.h"
 #include "SerialConfigHandler.h"
 
+// 直接用 TinyUSB 的 HID 就绪查询：tud_hid_n_ready(0)
+// （Arduino 的 USBHID::ready() 是 private hid 成员里的方法，外部拿不到）
+#include "class/hid/hid_device.h"
+
 // =============================================================================
 // 时序参数（毫秒）
 // =============================================================================
-// 这些值是"保守值"，宁可慢一点也不要丢字符。
-// 如果发现密码输错/丢字符，把下方常量调大即可。
+// 注意：起始等待不再是一个固定的大延迟。
+// 状态机每轮轮询 TinyUSB 的 tud_hid_n_ready()，**一旦电脑把 HID 接口配置好就
+// 立刻开始打字**，而不必死等 4~5 秒。
+// 只有在 USB 一直不就绪（比如插在只供电的充电器上）时，
+// 才会退回到 AUTOLOGIN_FALLBACK_DELAY 继续走流程。
 
-// 上电后等多久才开始：给 Windows 装 HID 驱动 + 用户看清锁定界面
+// USB 就绪后，再等这么久让它稳定（Windows 挂上驱动后偶有极短的抖动）
+static const uint32_t AUTOLOGIN_USB_SETTLE = 150;
+
+// USB 一直没就绪时的兜底等待：到点仍然尝试打字，避免永远卡住
+static const uint32_t AUTOLOGIN_FALLBACK_DELAY = 8000;
+
+// 没有启用 USB 就绪检测时的默认等待（settings.autoLoginDelay <= 0 且强制模式）
 static const uint32_t AUTOLOGIN_BOOT_DELAY = 5000;
 
 // 按下 NumLock 叫醒屏幕后，等登录界面画出来
@@ -56,6 +69,11 @@ static uint32_t bootDelayMs_ = AUTOLOGIN_BOOT_DELAY;
 static uint32_t userTypedAt_ = 0;
 static bool userTyped_ = false;
 
+// USB 就绪检测
+static bool usbReadySeen_ = false;    // 是否曾经看到过 USB 就绪
+static uint32_t usbReadyAt_ = 0;      // 首次就绪的时间点
+static bool waitUsbReady_ = true;     // 本次是否启用"等 USB 就绪"
+
 // 防止重复触发（一次插拔只登录一次）
 static bool attemptedThisBoot_ = false;
 
@@ -67,6 +85,12 @@ static void alSetState(AutoLoginState s)
     state_ = s;
     stateSince_ = millis();
     debugI("AutoLogin: state -> %d", (int)s);
+}
+
+// USB HID 接口是否已经就绪（电脑完成枚举、驱动挂上）
+static bool usbHidReady()
+{
+    return tud_hid_n_ready(0);
 }
 
 // -----------------------------------------------------------------------------
@@ -83,11 +107,30 @@ void AutoLoginHandler::init()
         return;
     }
 
-    bootDelayMs_ = settings.device.autoLoginDelay > 0
-                       ? (uint32_t)settings.device.autoLoginDelay
-                       : AUTOLOGIN_BOOT_DELAY;
+    // autoLoginDelay 的新语义：
+    //   > 0 : 仍按固定延迟等待（想手动加延时的人可以设它）
+    //   = 0 : 立刻开始，只等 USB 就绪（推荐，插上即打）
+    //   < 0 : 同 0，但强制等 USB 就绪、不启用兜底超时
+    //
+    // 默认配置是 0，所以插上电脑后一旦 HID 就绪就立刻输入，
+    // 不再固定傻等 4 秒。
+    const int cfgDelay = settings.device.autoLoginDelay;
+    if (cfgDelay > 0)
+    {
+        // 用户显式要求固定延迟：不做 USB 轮询，纯计时
+        waitUsbReady_ = false;
+        bootDelayMs_ = (uint32_t)cfgDelay;
+        debugI("AutoLogin: fixed delay mode, will type after %u ms", (unsigned)bootDelayMs_);
+    }
+    else
+    {
+        // 等 USB 就绪模式：一就绪 + 短暂稳定期就开始
+        waitUsbReady_ = true;
+        bootDelayMs_ = AUTOLOGIN_USB_SETTLE;
+        debugI("AutoLogin: waiting for USB HID ready, then typing after %u ms",
+               (unsigned)bootDelayMs_);
+    }
 
-    debugI("AutoLogin: enabled, will type after %u ms", (unsigned)bootDelayMs_);
     startStateMachine();
 }
 
@@ -95,7 +138,9 @@ void AutoLoginHandler::trigger()
 {
     debugI("AutoLogin: manual trigger");
     attemptedThisBoot_ = false;
-    bootDelayMs_ = 1500; // 手动触发时不用等那么久
+    // 手动触发时 USB 一般已经就绪，短暂等待即可
+    waitUsbReady_ = true;
+    bootDelayMs_ = AUTOLOGIN_USB_SETTLE;
     startStateMachine();
 }
 
@@ -188,6 +233,11 @@ void AutoLoginHandler::startStateMachine()
            (unsigned)loginPass_.length());
 
     userTyped_ = false;
+
+    // 每次启动流程都重新做一次 USB 就绪检测
+    usbReadySeen_ = false;
+    usbReadyAt_ = 0;
+
     alSetState(AL_WAIT_START);
 }
 
@@ -201,8 +251,42 @@ void AutoLoginHandler::stepStateMachine()
     switch (state_)
     {
     case AL_WAIT_START:
-        if (elapsed >= bootDelayMs_)
+    {
+        // ---------------------------------------------------------------
+        // 等 USB 就绪（而不是固定傻等）
+        // ---------------------------------------------------------------
+        // 电脑插入后要枚举设备、挂 HID 驱动，这段时间内发的按键会丢。
+        // 与其固定等 4~5 秒，不如每轮问一下 TinyUSB：
+        //   tud_hid_n_ready() == true  表示主机已经把配置描述符下发、
+        //   接口处于"可以接收报告"的状态——这时打字才不会丢。
+        if (waitUsbReady_ && !usbReadySeen_)
         {
+            if (usbHidReady())
+            {
+                usbReadySeen_ = true;
+                usbReadyAt_ = millis();
+                debugI("AutoLogin: USB HID ready at %u ms", (unsigned)usbReadyAt_);
+                // 同时打到 UART0：本项目默认关闭 RemoteDebug，debugI 是空宏，
+                // 只有直接 write 才能在串口上看到实际时刻。
+                Serial0.printf("[AutoLogin] USB HID ready at %u ms\r\n", (unsigned)usbReadyAt_);
+            }
+            else if (elapsed >= AUTOLOGIN_FALLBACK_DELAY)
+            {
+                // 一直不就绪（可能插在只供电的口上），照样往下走，
+                // 免得永远卡在这里。
+                debugW("AutoLogin: USB not ready after %u ms, continuing anyway",
+                       (unsigned)AUTOLOGIN_FALLBACK_DELAY);
+                usbReadySeen_ = true;
+                usbReadyAt_ = millis();
+            }
+            break;
+        }
+
+        // 这里 elapsed 从「就绪时刻」算起，或固定延迟模式下从进状态算起
+        const uint32_t waitBase = usbReadySeen_ ? (millis() - usbReadyAt_) : elapsed;
+        if (waitBase >= bootDelayMs_)
+        {
+            Serial0.printf("[AutoLogin] start typing at %u ms (since boot)\r\n", (unsigned)millis());
             if (wantWake_)
             {
                 alSetState(AL_WAKE);
@@ -213,6 +297,7 @@ void AutoLoginHandler::stepStateMachine()
             }
         }
         break;
+    }
 
     case AL_WAKE:
         // 一次 NumLock 轻按：点亮屏幕并进入密码输入状态。

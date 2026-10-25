@@ -9,11 +9,12 @@ Settings settings;
 // 注意 settings 是全局对象（零初始化），bool 默认 false、int 默认 0，
 // 所以这里显式给一份合理默认：
 //   autoLogin 默认 false —— 没见过配置就不乱打字，避免误触
+//   autoLoginDelay 默认 0 —— 0 表示"等 USB 就绪就立刻打字"，不固定等待
 //   loginWakeScreen / loginEnter 默认 true —— 打开后即可正确工作
 static void applyAutoLoginDefaults(DeviceSettings &d)
 {
     d.autoLogin = false;
-    d.autoLoginDelay = 5000;
+    d.autoLoginDelay = 0;
     d.loginSendUserName = false;
     d.loginWakeScreen = true;
     d.loginEnter = true;
