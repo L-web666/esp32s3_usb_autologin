@@ -126,45 +126,62 @@ jobs:
           echo "MD5: $(md5sum "$DST" | cut -d' ' -f1)"
 
       # ---------------------------------------------------------------------
-      # 用构建日期自动更新 manifest 的 version 字段
-      # 这样浏览器/CDN 每次看到版本号变化，就不会缓存旧固件
-      # 格式：日期 + 短 commit，例如 2026.10.25-3b66886
+      # 更新所有对外暴露的版本号 / 校验值
+      #
+      #   1) manifest.json 的 version —— 决定 ESP Web Tools 弹窗与缓存失效
+      #   2) index.html 里显示的版本文字 —— 以前是写死的 "1.0.10"，没人更新，
+      #      所以网页一直显示旧版本号
+      #   3) index.html 里显示的 MD5 —— 方便用户核对下载到的固件
+      #
+      # 版本格式：日期 + 短 commit，例如 2026.10.25-3b66886
       # ---------------------------------------------------------------------
-      - name: Stamp version in manifest
+      - name: Stamp version and MD5 into docs
         run: |
           set -euo pipefail
           VERSION="$(date -u +%Y.%m.%d)-$(git rev-parse --short HEAD)"
-          echo "新版本: $VERSION"
-          python - "$VERSION" <<'PY'
-          import json, sys
-          from pathlib import Path
-          version = sys.argv[1]
-          p = Path("docs/manifest.json")
-          data = json.loads(p.read_text(encoding="utf-8"))
-          data["version"] = version
-          p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-          print("manifest.json version ->", data["version"])
-          PY
-
-      # 同步更新网页上显示的 MD5，方便用户核对下载到的固件
-      - name: Update MD5 in flasher page
-        run: |
-          set -euo pipefail
           MD5="$(md5sum docs/firmware/device.bin | cut -d' ' -f1)"
-          echo "MD5 = $MD5"
-          python - "$MD5" <<'PY'
-          import re, sys
+          echo "版本: $VERSION"
+          echo "MD5 : $MD5"
+
+          python - "$VERSION" "$MD5" <<'PY'
+          import json, re, sys
           from pathlib import Path
-          md5 = sys.argv[1]
-          p = Path("docs/index.html")
-          html = p.read_text(encoding="utf-8")
-          new, n = re.subn(r'(<td>MD5</td><td><code>)[0-9A-Fa-f]{32}(</code>)',
-                           r'\g<1>' + md5 + r'\g<2>', html)
+
+          version, md5 = sys.argv[1], sys.argv[2]
+
+          # --- manifest.json ---
+          mp = Path("docs/manifest.json")
+          data = json.loads(mp.read_text(encoding="utf-8"))
+          data["version"] = version
+          mp.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                        encoding="utf-8")
+          print("manifest.json version ->", data["version"])
+
+          # --- index.html ---
+          ip = Path("docs/index.html")
+          html = ip.read_text(encoding="utf-8")
+          changes = 0
+
+          # 版本号：优先替换带 id 的 span，兼容老写法
+          html, n = re.subn(r'(<span id="fw-version">)[^<]*(</span>)',
+                            r'\g<1>' + version + r'\g<2>', html)
+          changes += n
+          print(f"fw-version span: {n} replaced")
           if n == 0:
-              print("::warning::MD5 row not found in docs/index.html")
-          else:
-              p.write_text(new, encoding="utf-8")
-              print(f"updated {n} MD5 occurrence(s)")
+              html, n2 = re.subn(r'(固件版本\s*)[0-9A-Za-z._\-]+',
+                                 r'\g<1>' + version, html)
+              changes += n2
+              print(f"fallback version text: {n2} replaced")
+
+          # MD5
+          html, n = re.subn(r'(<td>MD5</td><td><code>)[0-9A-Fa-f]{32}(</code>)',
+                            r'\g<1>' + md5 + r'\g<2>', html)
+          changes += n
+          print(f"MD5 row: {n} replaced")
+
+          ip.write_text(html, encoding="utf-8")
+          if changes == 0:
+              print("::warning::没有在 docs/index.html 里找到可替换的位置")
           PY
 
       # ---------------------------------------------------------------------

@@ -116,7 +116,7 @@
   <h1>ESP32-S3 Auto-Login Keyboard</h1>
   <p class="sub">
     浏览器一键烧录 · ESP32-S3 · 免安装任何工具
-    <br>固件版本 1.0.10 · 自动登录键盘 + UART0 串口配置
+    <br>固件版本 <span id="fw-version">2026.10.25-17add0c</span> · 自动登录键盘 + UART0 串口配置
   </p>
 
   <!-- ============ 烧录按钮 ============ -->
@@ -243,5 +243,25 @@
   </footer>
 
 </div>
+
+<script>
+  // 版本号以 manifest.json 为唯一来源：
+  // CI 每次构建都会改写 manifest 的 version，这里在页面加载时同步显示，
+  // 避免 HTML 里写死的版本号和真正烧录的固件对不上。
+  (async () => {
+    try {
+      const res = await fetch('manifest.json', { cache: 'no-store' });
+      if (!res.ok) return;
+      const m = await res.json();
+      if (!m.version) return;
+      const el = document.getElementById('fw-version');
+      if (el) el.textContent = m.version;
+      // 顺便把版本补进浏览器标签标题，方便开多个标签时区分
+      document.title = `ESP32-S3 Auto-Login Keyboard ${m.version} — 浏览器烧录`;
+    } catch (e) {
+      console.warn('读取 manifest 版本失败，保留页面上的静态版本号', e);
+    }
+  })();
+</script>
 </body>
 </html>
