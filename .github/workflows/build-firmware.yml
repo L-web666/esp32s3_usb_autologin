@@ -1,0 +1,206 @@
+name: Build Firmware & Update Web Flasher
+
+# =============================================================================
+#  什么时候会跑
+# =============================================================================
+on:
+  push:
+    branches: [main]
+    # 只在"会影响固件"的文件变动时触发，避免改个 README 就编译半小时
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'lib/**'
+      - 'data/**'
+      - 'tools/merge.py'
+      - 'platformio.ini'
+  workflow_dispatch:      # 也允许在 Actions 页面手动点按钮触发
+
+# 同一时间只跑一个，新的 push 会取消还在跑的那个
+concurrency:
+  group: firmware-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write         # 需要把编译产物提交回仓库
+
+env:
+  # 与本地构建保持一致的分区方案
+  PIO_ENV: esp32-s3-devkitc-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ---------------------------------------------------------------------
+      # 缓存 PlatformIO 的平台/工具链/依赖库
+      # 首次运行要下载约 1GB（约 10~20 分钟），之后命中缓存只需几分钟
+      # ---------------------------------------------------------------------
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+            .pio/libdeps
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            pio-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      # ---------------------------------------------------------------------
+      # 编译
+      # ---------------------------------------------------------------------
+      # 分两步跑：
+      #   1) buildfs  先产出 littlefs.bin
+      #   2) run      编译 app，并通过 tools/merge.py 合并出 device.bin
+      #
+      # 为什么要先单独 buildfs：merge.py 内部用 subprocess 再启动一个
+      # `python -m platformio run --target buildfs`。在 CI 环境里这个嵌套
+      # 调用不一定能拿到正确的环境变量，先显式跑一遍可以让它命中缓存，
+      # 也让失败点更清晰。
+      - name: Build filesystem image
+        run: pio run -e ${{ env.PIO_ENV }} -t buildfs
+
+      - name: Build firmware
+        run: pio run -e ${{ env.PIO_ENV }}
+
+      - name: Show build artifacts
+        run: ls -lh .pio/build/${{ env.PIO_ENV }}/*.bin
+
+      # device.bin 由 merge.py 生成；万一没有就自己合并一次兜底
+      - name: Ensure device.bin exists
+        run: |
+          set -euo pipefail
+          cd ".pio/build/${PIO_ENV}"
+          if [ -f device.bin ]; then
+            echo "device.bin 已由 merge.py 生成"
+            exit 0
+          fi
+          echo "::warning::device.bin 缺失，使用 esptool 手动合并"
+          for f in bootloader.bin partitions.bin firmware.bin littlefs.bin; do
+            [ -f "$f" ] || { echo "::error::缺少 $f"; exit 1; }
+          done
+          python -m esptool --chip esp32s3 merge_bin \
+            --flash_mode dio --flash_freq 80m --flash_size 8MB \
+            -o device.bin \
+            0x0 bootloader.bin \
+            0x8000 partitions.bin \
+            0x10000 firmware.bin \
+            0x670000 littlefs.bin
+          echo "手动合并完成: $(stat -c%s device.bin) bytes"
+
+      # ---------------------------------------------------------------------
+      # 把新固件复制到 docs/firmware/，网页烧录读的就是这个文件
+      # ---------------------------------------------------------------------
+      - name: Copy firmware to docs
+        run: |
+          set -euo pipefail
+          SRC=".pio/build/${PIO_ENV}/device.bin"
+          DST="docs/firmware/device.bin"
+          if [ ! -f "$SRC" ]; then
+            echo "::error::device.bin was not produced by the build"
+            exit 1
+          fi
+          mkdir -p docs/firmware
+          cp "$SRC" "$DST"
+          echo "旧文件大小: $(stat -c%s "$DST" 2>/dev/null || echo none) bytes"
+          echo "新文件大小: $(stat -c%s "$DST") bytes"
+          echo "MD5: $(md5sum "$DST" | cut -d' ' -f1)"
+
+      # ---------------------------------------------------------------------
+      # 用构建日期自动更新 manifest 的 version 字段
+      # 这样浏览器/CDN 每次看到版本号变化，就不会缓存旧固件
+      # 格式：日期 + 短 commit，例如 2026.10.25-3b66886
+      # ---------------------------------------------------------------------
+      - name: Stamp version in manifest
+        run: |
+          set -euo pipefail
+          VERSION="$(date -u +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+          echo "新版本: $VERSION"
+          python - "$VERSION" <<'PY'
+          import json, sys
+          from pathlib import Path
+          version = sys.argv[1]
+          p = Path("docs/manifest.json")
+          data = json.loads(p.read_text(encoding="utf-8"))
+          data["version"] = version
+          p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+          print("manifest.json version ->", data["version"])
+          PY
+
+      # 同步更新网页上显示的 MD5，方便用户核对下载到的固件
+      - name: Update MD5 in flasher page
+        run: |
+          set -euo pipefail
+          MD5="$(md5sum docs/firmware/device.bin | cut -d' ' -f1)"
+          echo "MD5 = $MD5"
+          python - "$MD5" <<'PY'
+          import re, sys
+          from pathlib import Path
+          md5 = sys.argv[1]
+          p = Path("docs/index.html")
+          html = p.read_text(encoding="utf-8")
+          new, n = re.subn(r'(<td>MD5</td><td><code>)[0-9A-Fa-f]{32}(</code>)',
+                           r'\g<1>' + md5 + r'\g<2>', html)
+          if n == 0:
+              print("::warning::MD5 row not found in docs/index.html")
+          else:
+              p.write_text(new, encoding="utf-8")
+              print(f"updated {n} MD5 occurrence(s)")
+          PY
+
+      # ---------------------------------------------------------------------
+      # 只有真的发生变化才提交，避免空提交导致无限循环
+      # [skip ci] 防止本 workflow 被自己的提交再次触发
+      # ---------------------------------------------------------------------
+      - name: Commit updated firmware
+        id: commit
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docs/firmware/device.bin docs/manifest.json docs/index.html
+
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "固件没有变化，跳过提交"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            VERSION="$(python -c "import json;print(json.load(open('docs/manifest.json'))['version'])")"
+            git commit -m "chore(firmware): auto-build ${VERSION} [skip ci]"
+            git push
+          fi
+
+      # ---------------------------------------------------------------------
+      # 顺便把 device.bin 挂到 GitHub Release（可选，方便直接下载）
+      # 每当 manifest 版本变化就建一个对应的 tag
+      # ---------------------------------------------------------------------
+      - name: Upload release asset
+        if: steps.commit.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: fw-${{ github.run_number }}
+          name: Firmware build ${{ github.run_number }}
+          files: docs/firmware/device.bin
+          generate_release_notes: false
+          body: |
+            自动构建的固件镜像（单文件整片烧录，偏移 `0x0`）。
+
+            也可以用浏览器烧录页直接安装。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
